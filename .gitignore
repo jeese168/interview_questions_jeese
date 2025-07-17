@@ -1,0 +1,29 @@
+# IDE 相关文件
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Obsidian 笔记工具
+.obsidian/
+
+# 默认忽略的文件
+/shelf/
+/httpRequests/
+
+# 依赖于环境的 Maven 主目录路径
+/mavenHomeManager.xml
+
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# 其他常见的忽略文件
+*.log
+*.tmp
+*.temp
+/trash/
+
+# 系统文件
+.DS_Store
+Thumbs.db
