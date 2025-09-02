@@ -4,8 +4,11 @@
 *.ipr
 *.iws
 
-# Obsidian 笔记工具
-.obsidian/
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# 排除缓存文件
+.obsidian/cache/
 
 # 默认忽略的文件
 /shelf/
@@ -27,3 +30,4 @@
 # 系统文件
 .DS_Store
 Thumbs.db
+
