@@ -117,7 +117,7 @@ A：
 
 #### 无序性和不可重复性的含义是什么？（准确定义理解）
 
-- 无序性不等于随机性 ，无序性是指存储的数据在底层数组中并非按照添加、顺序添加 ，而是根据数据的哈希值决定的。
+- 无序性不等于随机性 ，无序性是指存储的数据在底层数组中并非按照添加顺序、元素自然顺序和自定义比较器决定存储位置 ，而是根据数据的哈希值决定的。
 - 不可重复性是指添加的元素按照 `equals()` 判断时 ，返回 false，需要同时重写 `equals()` 方法和 `hashCode()` 方法。
 
 
@@ -187,18 +187,19 @@ A：
 **并发 Queue**
 
 - **ConcurrentLinkedQueue**
-   无锁的队列实现，适用于高并发场景。通过 CAS 操作实现高性能，通常在高并发情况下性能优于 `BlockingQueue`。
+   无锁的队列实现，适用于高并发场景。通过 CAS 操作实现高性能，通常在高并发情况下性能优于 `BlockingQueue`，无容量限制。
 - **BlockingQueue**
-   主要功能是简化多线程之间的数据共享。通过阻塞机制，生产者或消费者会在队列为空或满时等待。常用于生产者-消费者模式。
+   主要功能是简化多线程之间的数据共享。通过阻塞机制，生产者或消费者会在队列为空或满时等待。常用于生产者-消费者模式，容量限制后添加阻塞。
 
-| 集合类                   | 数据结构 | 特点     | 实现方式          | 适用场景      | 性能  |
-| --------------------- | ---- | ------ | ------------- | --------- | --- |
-| ConcurrentLinkedQueue | 链表   | 无界队列   | CAS           | 高并发场景     | 极好  |
-| ArrayBlockingQueue    | 数组   | 有界队列   | ReentrantLock | 生产者-消费者模式 | 好   |
-| LinkedBlockingQueue   | 链表   | 可选有界队列 | ReentrantLock | 生产者-消费者模式 | 好   |
-| PriorityBlockingQueue | 堆    | 优先级队列  | ReentrantLock | 优先级排序场景   | 好   |
-| DelayQueue            | 堆    | 延迟获取   | ReentrantLock | 延迟任务场景    | 好   |
 
+
+|集合类|数据结构|特点|实现方式|适用场景|性能|容量特性|
+|---|---|---|---|---|---|---|
+|ConcurrentLinkedQueue|链表|无界队列|CAS|高并发场景|极好|无界|
+|ArrayBlockingQueue|数组|有界队列|ReentrantLock|生产者-消费者模式|好|有界|
+|LinkedBlockingQueue|链表|可选有界队列|ReentrantLock|生产者-消费者模式|好|默认无界，可指定有界|
+|PriorityBlockingQueue|堆|优先级队列|ReentrantLock|优先级排序场景|好|无界（自动扩容）|
+|DelayQueue|堆|延迟获取|ReentrantLock|延迟任务场景|好|无界|
 
 
 
@@ -346,7 +347,7 @@ list.add("C");
 list.stream().forEach(element -> System.out.println(element));
 ```
 
-- **优点**：可以进行复杂的函数式操作，比如对元素进行过滤、转换和聚合等。
+- **优点**：可以进行复杂的函数式操作，比如对元素进行过滤、转换和映射等。
 - **缺点**：性能可能不如传统的 `for` 循环，尤其在操作复杂时。
 
 
@@ -425,7 +426,7 @@ A：**fail-fast** 和 **fail-safe** 是两种不同的错误处理设计哲学�
 
 
 
-#### **迭代器的实现原理？***
+#### **迭代器的实现原理？** *
 
 集合的遍历方式：迭代器遍历、增强for遍历、Lambda表达式遍历等等  
 除了普通for遍历几乎所有其他便利方式，的底层实现也是调用迭代器的方法遍历。
@@ -1333,22 +1334,18 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 - **有序的 Set 是TreeSet和LinkedHashSet**。TreeSet是基于红黑树实现，保证元素的自然顺序。LinkedHashSet是基于双重链表和哈希表的结合来实现元素的有序存储，保证元素添加的自然顺序
 - **记录插入顺序的集合通常指的是LinkedHashSet**，它不仅保证元素的唯一性，还可以保持元素的插入顺序。当需要在Set集合中记录元素的插入顺序时，可以选择使用LinkedHashSet来实现。
 
-### Queue与Deque
+### Queue与Deque*
 
 #### ArrayDeque 与 LinkedList 的区别
 
-`ArrayDeque` 和 `LinkedList` 都实现了 `Deque` 接口，两者都具有队列的功能，但两者有什么区别呢？
+`ArrayDeque` 和 `LinkedList` 都实现了 `Deque` 和 `queue` 接口，两者都具有队列的功能，但：
 
 - `ArrayDeque` 是基于可变长的数组和双指针来实现，而 `LinkedList` 则通过链表来实现。
-    
-- `ArrayDeque` 不支持存储 `NULL` 数据，但 `LinkedList` 支持。
-    
-- `ArrayDeque` 是在 JDK1.6 才被引入的，而`LinkedList` 早在 JDK1.2 时就已经存在。
-    
 - `ArrayDeque` 插入时可能存在扩容过程, 不过均摊后的插入操作依然为 O(1)。虽然 `LinkedList` 不需要扩容，但是每次插入数据时均需要申请新的堆空间，均摊性能相比更慢。
+- `ArrayDeque` 也可以用于实现栈。 `LinkedList` 可用于实现 `list`
     
 
-从性能的角度上，选用 `ArrayDeque` 来实现队列要比 `LinkedList` 更好。此外，`ArrayDeque` 也可以用于实现栈。
+从性能的角度上，选用 `ArrayDeque` 来实现队列要比 `LinkedList` 更好。
 
 #### 说一说 PriorityQueue
 
@@ -1362,6 +1359,8 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 - `PriorityQueue` 默认是小顶堆，但可以接收一个 `Comparator` 作为构造参数，从而来自定义元素优先级的先后。
 
 `PriorityQueue` 在面试中可能更多的会出现在手撕算法的时候，典型例题包括堆排序、求第 K 大的数、带权图的遍历等，所以需要会熟练使用才行。
+
+
 
 #### 什么是 BlockingQueue？
 
@@ -1390,7 +1389,24 @@ Java 中常用的阻塞队列实现类有以下几种：
 5. `DelayQueue`：延迟队列，其中的元素只有到了其指定的延迟时间，才能够从队列中出队。
 6. ……
 
-日常开发中，这些队列使用的其实都不多，了解即可。
+| 集合类                   | 数据结构 | 特点     | 实现方式          | 适用场景      | 性能  | 容量特性       |
+| --------------------- | ---- | ------ | ------------- | --------- | --- | ---------- |
+| ArrayBlockingQueue    | 数组   | 有界队列   | ReentrantLock | 生产者-消费者模式 | 好   | 有界         |
+| LinkedBlockingQueue   | 链表   | 可选有界队列 | ReentrantLock | 生产者-消费者模式 | 好   | 默认无界，可指定有界 |
+| PriorityBlockingQueue | 堆    | 优先级队列  | ReentrantLock | 优先级排序场景   | 好   | 无界（自动扩容）   |
+| DelayQueue            | 堆    | 延迟获取   | ReentrantLock | 延迟任务场景    | 好   | 无界         |
+
+#### BlockingQueue和ConcurrentLinkedQueue区别？
+
+**ConcurrentLinkedQueue**
+   **无锁、无界、非阻塞**的队列实现，适用于高并发场景。通过 CAS 操作实现高性能，通常在高并发情况下性能优于 `BlockingQueue`，无容量限制。
+
+**BlockingQueue**
+   `BlockingQueue` 是**锁+条件队列、可有界、可阻塞**的同步队列，利用`Renentrylock`实现同步，且提供阻塞获取方法，添加/获取会在队列为满/空时等待。常用于生产者-消费者模式，部分实现有容量限制，提供阻塞等待机制。
+
+两者根本差异在于“阻不阻塞”，应用场景：
+- **高并发读写的轻量级场景** → ConcurrentLinkedQueue
+- **需要阻塞等待**且**要求线程协调** → BlockingQueue
 
 #### ⭐️ArrayBlockingQueue 和 LinkedBlockingQueue 有什么区别？
 
@@ -1399,4 +1415,3 @@ Java 中常用的阻塞队列实现类有以下几种：
 - 底层实现：`ArrayBlockingQueue` 基于数组实现，而 `LinkedBlockingQueue` 基于链表实现。
 - 是否有界：`ArrayBlockingQueue` 是有界队列，必须在创建时指定容量大小。`LinkedBlockingQueue` 创建时可以不指定容量大小，默认是`Integer.MAX_VALUE`，也就是无界的。但也可以指定队列大小，从而成为有界的。
 - 锁是否分离： `ArrayBlockingQueue`中的锁是没有分离的，即生产和消费用的是同一个锁；`LinkedBlockingQueue`中的锁是分离的，即生产用的是`putLock`，消费是`takeLock`，这样可以防止生产者和消费者线程之间的锁争夺。
-- 内存占用：`ArrayBlockingQueue` 需要提前分配数组内存，而 `LinkedBlockingQueue` 则是动态分配链表节点内存。这意味着，`ArrayBlockingQueue` 在创建时就会占用一定的内存空间，且往往申请的内存比实际所用的内存更大，而`LinkedBlockingQueue` 则是根据元素的增加而逐渐占用内存空间。
