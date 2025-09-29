@@ -105,7 +105,7 @@ Java 还提供了许多专用的集合类，它们在特定场景下具有特殊
 - **CopyOnWriteArrayList** 和 **CopyOnWriteArraySet**：线程安全的集合实现，每次修改都会复制底层数组，适用于读多写少的场景。
 - **ConcurrentHashMap**：线程安全的 `Map` 实现，支持并发操作。
 
-**Q：什么情况下用队列，什么情况下用双端队列来着？**
+##### **追问Q：什么情况下用队列，什么情况下用双端队列来着？**
 A：
 1. 队列类型
 - **任务调度**：生产者放入任务，消费者按顺序处理
@@ -588,7 +588,7 @@ public boolean add(E e) {
 
 
 
-#### ArrayList 和 LinkedList 的应用场景？
+#### ArrayList 和 LinkedList 的应用场景？*
 
 **ArrayList** 是应用动态数组实现，适合需要频繁随机访问和较少插入删除操作的场景（如查询、缓存、简单数据存储等）。
 
@@ -725,7 +725,7 @@ CopyonWriteArraylist优点在于
 
 
 
-#### HashMap是线程安全的吗？
+#### HashMap是线程安全的吗？*
 
 hashmap不是线程安全的，hashmap在多线程会存在环形链表问题和数据覆盖问题。
 
@@ -755,7 +755,7 @@ map.put("key", "value2");  // 线程B
 
 
 
-##### 3. **可能出现的NPE(空指针异常)**
+##### 3. 可能出现的NPE(空指针异常) * 
 
 ```java
 HashMap<String, Object> map = new HashMap<>();
@@ -917,7 +917,7 @@ static final int hash(Object key) {
 
 
 
-#### 重写HashMap的equal和hashcode方法需要注意什么？
+#### 重写HashMap的equal和hashcode方法需要注意什么？*
 
 HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的索引位置。且不管是写入 put() 和读取get() 操作， hashCode() 和 equals() 方法被用到。
 
@@ -934,13 +934,13 @@ HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的
 
 
 
-#### 重写HashMap的equal方法不当会出现什么问题？
+#### 重写HashMap的equal方法不当会出现什么问题？*
 
 HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的索引位置。而且HashMap在比较元素时，会先通过hashCode进行比较，相同的情况下再通过equals进行比较。**所以 equals相等的两个对象，hashCode一定相等。hashCode相等的两个对象，equals不一定相等（比如散列冲突的情况）**
 
 
 
-若hashCode() 和 equals() 方法没有被正确地实现，两个不同Key也许会产生相同的hashCode()和equals()输出，HashMap将会认为它们是相同的，然后覆盖它们，造成数据丢失。
+元素覆盖：若hashCode() 和 equals() 方法没有被正确地实现，两个不同Key也许会产生相同的hashCode()和equals()输出，HashMap将会认为它们是相同的，然后覆盖它们，造成数据丢失。
 
 或重写了equals方法，不重写hashCode方法时，可能会出现equals方法返回为true，而hashCode方法却返回false，这样的一个后果会导致在hashmap等类中存储多个一模一样的对象，与hashmap只能有唯一的key的规范不符合。
 
@@ -1129,7 +1129,7 @@ ConcurrentHashMap在不同版本的jdk中实现比较大，我们分开来讲
 
 
 
-**Q： JDK 1.7 `ConcurrentHashMap` 怎么定位到哪个 `Segment`的？**
+##### 追问Q： JDK 1.7 `ConcurrentHashMap` 怎么定位到哪个 `Segment`的？*
 
 A：通过**哈希值**来计算一个键应该映射到哪个 `Segment`。每个 `Segment` 对应一个 **哈希表**，它有自己的锁。要定位到具体的 `Segment`，需要根据键的哈希值计算出一个分段索引。
 
@@ -1167,11 +1167,11 @@ int index = (hash & (table.length - 1));
 
 分段锁 `Segment` 继承了 `ReentrantLock`，`ReentrantLock`是典型的可重入锁，名字都叫Reentrant（重入）。
 
-具体`ReentrantLock`怎么实现了可重入请看jeese的并发编程面试题。
+具体`ReentrantLock`怎么实现了可重入请看[[Java并发编程面试题#synchronized和reentrantlock支持重入吗？如何实现的?]]。
 
 
 
-#### 已经用了synchronized，为什么还要用CAS呢？
+#### 已经用了synchronized，为什么还要用CAS呢？*
 
 ConcurrentHashMap同时使用来保证线程安全主要是一种权衡的考虑，主要是根据锁竞争程度来判断的。
 
@@ -1252,7 +1252,7 @@ return null;
 
 
 
-#### hashtable 和concurrentHashMap有什么区别？*
+#### hashtable 和concurrentHashMap有什么区别？
 
 最主要的区别是底层数据结构、实现同步的方式和扩容过程三大方面。
 
@@ -1298,7 +1298,7 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 
 
-#### 说一下HashMap和Hashtable、ConcurrentMap的区别？*
+#### 说一下HashMap和Hashtable、ConcurrentMap的区别？
 
 这三者最核心的区别就是HashMap是不线程安全的，Hashtable、ConcurrentMap是线程安全的。且这两者最大区别是Hashtable、ConcurrentMap线程安全的锁粒度有差别。
 
@@ -1364,7 +1364,7 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 #### 什么是 BlockingQueue？
 
-`BlockingQueue` （阻塞队列）是一个接口，继承自 `Queue`。`BlockingQueue`阻塞的原因是其支持当队列没有元素时一直阻塞，直到有元素；还支持如果队列已满，一直等到队列可以放入新元素时再放入。
+`BlockingQueue` 是一种提供了阻塞方法的线程安全队列。`BlockingQueue`阻塞两个方法，消费者消费发现队列没有元素时一直阻塞，直到有元素；生产者生产时如果队列已满，一直等到队列可以放入新元素时再放入。
 
 ```java
 public interface BlockingQueue<E> extends Queue<E> {
@@ -1382,12 +1382,13 @@ public interface BlockingQueue<E> extends Queue<E> {
 
 Java 中常用的阻塞队列实现类有以下几种：
 
-1. `ArrayBlockingQueue`：使用数组实现的有界阻塞队列。在创建时需要指定容量大小，并支持公平和非公平两种方式的锁访问机制。
-2. `LinkedBlockingQueue`：使用单向链表实现的可选有界阻塞队列。在创建时可以指定容量大小，如果不指定则默认为`Integer.MAX_VALUE`。和`ArrayBlockingQueue`不同的是， 它仅支持非公平的锁访问机制。
+1. `ArrayBlockingQueue`：使用数组实现的有界阻塞队列。在创建时必需要指定容量大小，有界队列。
+2. `LinkedBlockingQueue`：使用单向链表实现的可选有界阻塞队列。在创建时可以指定容量大小，如果不指定则默认为`Integer.MAX_VALUE`。。
 3. `PriorityBlockingQueue`：支持优先级排序的无界阻塞队列。元素必须实现`Comparable`接口或者在构造函数中传入`Comparator`对象，并且不能插入 null 元素。
 4. `SynchronousQueue`：同步队列，是一种不存储元素的阻塞队列。每个插入操作都必须等待对应的删除操作，反之删除操作也必须等待插入操作。因此，`SynchronousQueue`通常用于线程之间的直接传递数据。
-5. `DelayQueue`：延迟队列，其中的元素只有到了其指定的延迟时间，才能够从队列中出队。
-6. ……
+5. `DelayQueue`：延迟队列，基于`PriorityBlockingQueue`实现，封装了提交的任务，最快截止的任务才越靠近堆顶，其中take方法获取元素检查堆顶元素的到期时间，如果还没有到达，那就阻塞。
+
+**具体他们的应用可以参加并发编程中线程池的章节：**[[Java并发编程面试题#线程池工作队列一般用的是什么队列？*]]
 
 | 集合类                   | 数据结构 | 特点     | 实现方式          | 适用场景      | 性能  | 容量特性       |
 | --------------------- | ---- | ------ | ------------- | --------- | --- | ---------- |
@@ -1396,7 +1397,7 @@ Java 中常用的阻塞队列实现类有以下几种：
 | PriorityBlockingQueue | 堆    | 优先级队列  | ReentrantLock | 优先级排序场景   | 好   | 无界（自动扩容）   |
 | DelayQueue            | 堆    | 延迟获取   | ReentrantLock | 延迟任务场景    | 好   | 无界         |
 
-#### BlockingQueue和ConcurrentLinkedQueue区别？
+#### BlockingQueue和ConcurrentLinkedQueue区别？*
 
 **ConcurrentLinkedQueue**
    **无锁、无界、非阻塞**的队列实现，适用于高并发场景。通过 CAS 操作实现高性能，通常在高并发情况下性能优于 `BlockingQueue`，无容量限制。
@@ -1408,10 +1409,11 @@ Java 中常用的阻塞队列实现类有以下几种：
 - **高并发读写的轻量级场景** → ConcurrentLinkedQueue
 - **需要阻塞等待**且**要求线程协调** → BlockingQueue
 
-#### ⭐️ArrayBlockingQueue 和 LinkedBlockingQueue 有什么区别？
+#### ⭐️ArrayBlockingQueue 和 LinkedBlockingQueue 有什么区别？*
 
 `ArrayBlockingQueue` 和 `LinkedBlockingQueue` 是 Java 并发包中常用的两种阻塞队列实现，它们都是线程安全的。不过，不过它们之间也存在下面这些区别：
 
 - 底层实现：`ArrayBlockingQueue` 基于数组实现，而 `LinkedBlockingQueue` 基于链表实现。
 - 是否有界：`ArrayBlockingQueue` 是有界队列，必须在创建时指定容量大小。`LinkedBlockingQueue` 创建时可以不指定容量大小，默认是`Integer.MAX_VALUE`，也就是无界的。但也可以指定队列大小，从而成为有界的。
 - 锁是否分离： `ArrayBlockingQueue`中的锁是没有分离的，即生产和消费用的是同一个锁；`LinkedBlockingQueue`中的锁是分离的，即生产用的是`putLock`，消费是`takeLock`，这样可以防止生产者和消费者线程之间的锁争夺。
+
