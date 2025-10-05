@@ -1,4 +1,5 @@
 # interview_questions_jeese
 个人用来准备面试的面试题目前是Java，后续可能加入大模型ai大模型应用开发相关，以及完善现有的八股
+请搭配obsidian使用阅读md笔记
 
 
