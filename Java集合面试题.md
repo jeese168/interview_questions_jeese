@@ -460,11 +460,11 @@ public interface Iterator<E> {
 
 ### List
 
-#### 讲一下java里面list的几种实现，几种实现有什么不同？
+#### 讲一下java里面list的几种实现，几种实现有什么不同？*
 
 `List`接口用于存储元素的有序集合。以下是Java中常见的`List`实现及其特点： ![image.png](文档图片/1721807143695-c1058186-be42-4746-a273-6302a128e328.png)
 
-* Vector 是 Java 早期提供的线程安全的动态数组历史遗留产物，如果不需要线程安全，并不建议选择。Vector 是应用动态数组实现，可以根据需要自动的增加容量，当数组已满时，扩容时创建新的数组增加一倍 1 倍空间，并拷贝原有数组数据。
+* Vector 是 Java 早期提供的线程安全的动态数组历史遗留产物，如果不需要线程安全，并不建议选择。Vector 是应用动态数组实现，可以根据需要自动的增加容量，当数组已满时，扩容时创建新的数组增加一倍 1 倍空间，并拷贝原有数组数据，**初始值为10，而且每次扩容为两倍。**
 
 - ArrayList 是应用动态数组实现，本身不是线程安全的，所以性能要好很多。与 Vector 近似，ArrayList 也是可以根据需要调整容量，不过相比vector有所区别在扩充容量时 ArrayList 则是增加 50%。但由于是通过速度实现，所以进行插入或删除时，性能较差，时间复杂度为 O(n)。
 - LinkedList 是 Java 提供的双向链表，和 `ArrayList` 类似，`LinkedList` 也不是线程安全的。链表结构不需要像上面两种那样调整容量而且在中间部分插入删除性能较好，但是没有随机存取访问的平均时间复杂度为O(n)。
@@ -1061,7 +1061,7 @@ Java的hashMap初始数组大小是16，当插入 20 个元素时，HashMap 的�
 
 
 
-#### 说说hashmap的负载因子
+#### 说说hashmap的负载因子？*
 
 HashMap 负载因子 loadFactor 的默认值是 0.75，当 HashMap 中的元素个数超过了容量的 75% 时，就会进行扩容。
 
@@ -1171,7 +1171,7 @@ int index = (hash & (table.length - 1));
 
 
 
-#### 已经用了synchronized，为什么还要用CAS呢？*
+#### 已经用了synchronized，为什么还要用CAS呢？
 
 ConcurrentHashMap同时使用来保证线程安全主要是一种权衡的考虑，主要是根据锁竞争程度来判断的。
 
@@ -1336,7 +1336,7 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 ### Queue与Deque*
 
-#### ArrayDeque 与 LinkedList 的区别
+#### ArrayDeque 与 LinkedList 的区别*
 
 `ArrayDeque` 和 `LinkedList` 都实现了 `Deque` 和 `queue` 接口，两者都具有队列的功能，但：
 
@@ -1347,24 +1347,25 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 从性能的角度上，选用 `ArrayDeque` 来实现队列要比 `LinkedList` 更好。
 
-#### 说一说 PriorityQueue
+#### 说一说 PriorityQueue*
 
-`PriorityQueue` 是在 JDK1.5 中被引入的, 其与 `Queue` 的区别在于元素出队顺序是与优先级相关的，即总是优先级最高的元素先出队。
+`PriorityQueue` 底层的话是基于数组的结构来实现，采用了堆的思想，诗词按照元素自然顺序或者指定的比较器来进行出队元素，即总是优先级最高的元素先出队。
 
-这里列举其相关的一些要点：
-
-- `PriorityQueue` 利用了二叉堆的数据结构来实现的，底层使用可变长的数组来存储数据
-- `PriorityQueue` 通过堆元素的上浮和下沉，实现了在 O(logn) 的时间复杂度内插入元素和删除堆顶元素。
-- `PriorityQueue` 是非线程安全的，且不支持存储 `NULL` 和 `non-comparable` 的对象。
-- `PriorityQueue` 默认是小顶堆，但可以接收一个 `Comparator` 作为构造参数，从而来自定义元素优先级的先后。
-
+>这里列举其相关的一些要点：
+>- `PriorityQueue` 利用了二叉堆的数据结构来实现的，底层使用可变长的数组来存储数据
+>- `PriorityQueue` 通过堆元素的上浮和下沉，实现了在 O(logn) 的时间复杂度内插入元素和删除堆顶元素。
+>- `PriorityQueue` 是非线程安全的，且不支持存储 `NULL` 和 `non-comparable` 的对象。
+>- `PriorityQueue` 默认是小顶堆，但可以接收一个 `Comparator` 作为构造参数，从而来自定义元素优先级的先后。
+>
 `PriorityQueue` 在面试中可能更多的会出现在手撕算法的时候，典型例题包括堆排序、求第 K 大的数、带权图的遍历等，所以需要会熟练使用才行。
 
 
 
-#### 什么是 BlockingQueue？
+#### 什么是 BlockingQueue？*
 
-`BlockingQueue` 是一种提供了阻塞方法的线程安全队列。`BlockingQueue`阻塞两个方法，消费者消费发现队列没有元素时一直阻塞，直到有元素；生产者生产时如果队列已满，一直等到队列可以放入新元素时再放入。
+`BlockingQueue` 是属于juc包下的线程安全队列的一种类型，底下的话包括了很多具体的事情。
+
+和`ConcurrentLinkedQueue`的本质区别就是`ConcurrentLinkedQueue`基于分项链表以及无锁的CAS操作，实现高并发的队列操作，但没涉及到阻塞方法。而`BlockingQueue`提供了两个阻塞方法，非常有利于实现生产者消费者模型，消费者消费发现队列没有元素时一直阻塞，直到有元素；生产者生产时如果队列已满，一直等到队列可以放入新元素时再放入。典型案例就是在线程池中简化了线程同步的机制。
 
 ```java
 public interface BlockingQueue<E> extends Queue<E> {
@@ -1383,9 +1384,9 @@ public interface BlockingQueue<E> extends Queue<E> {
 Java 中常用的阻塞队列实现类有以下几种：
 
 1. `ArrayBlockingQueue`：使用数组实现的有界阻塞队列。在创建时必需要指定容量大小，有界队列。
-2. `LinkedBlockingQueue`：使用单向链表实现的可选有界阻塞队列。在创建时可以指定容量大小，如果不指定则默认为`Integer.MAX_VALUE`。。
-3. `PriorityBlockingQueue`：支持优先级排序的无界阻塞队列。元素必须实现`Comparable`接口或者在构造函数中传入`Comparator`对象，并且不能插入 null 元素。
-4. `SynchronousQueue`：同步队列，是一种不存储元素的阻塞队列。每个插入操作都必须等待对应的删除操作，反之删除操作也必须等待插入操作。因此，`SynchronousQueue`通常用于线程之间的直接传递数据，**无法指定最大容量。**
+2. `LinkedBlockingQueue`：使用单向链表实现的可选有界阻塞队列。在创建时可以指定容量大小，如果不指定则默认为`Integer.MAX_VALUE`。
+3. `PriorityBlockingQueue`：支持优先级排序的无界阻塞队列。元素必须实现`Comparable`接口或者在构造函数中传入`Comparator`对象，并且不能插入 null 元素，**无法指定最大容量。**
+4. `SynchronousQueue`：同步队列，是一种不存储元素的阻塞队列。每个插入操作都必须等待对应的删除操作，反之删除操作也必须等待插入操作。因此，`SynchronousQueue`通常用于线程之间的直接传递数据。
 5. `DelayQueue`：延迟队列，基于`PriorityBlockingQueue`实现，封装了提交的任务，最快截止的任务才越靠近堆顶，其中take方法获取元素检查堆顶元素的到期时间，如果还没有到达，那就阻塞，**无法指定最大容量**。
 
 **具体他们的应用可以参加并发编程中线程池的章节：**[[Java并发编程面试题#线程池工作队列一般用的是什么队列？*]]
@@ -1409,7 +1410,7 @@ Java 中常用的阻塞队列实现类有以下几种：
 - **高并发读写的轻量级场景** → ConcurrentLinkedQueue
 - **需要阻塞等待**且**要求线程协调** → BlockingQueue
 
-#### ⭐️ArrayBlockingQueue 和 LinkedBlockingQueue 有什么区别？*
+#### ⭐️ArrayBlockingQueue 和 LinkedBlockingQueue 有什么区别？
 
 `ArrayBlockingQueue` 和 `LinkedBlockingQueue` 是 Java 并发包中常用的两种阻塞队列实现，它们都是线程安全的。不过，不过它们之间也存在下面这些区别：
 
