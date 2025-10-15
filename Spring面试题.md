@@ -743,7 +743,7 @@ Spring AOP允许开发者定义切面（Aspect），这些切面可以横切关�
 
 **Q：为什么需要三级缓存？**
 
-A：**一级缓存**（singletonObjects）用来存储完全初始化好的单例Bean（成品对象）。但**三级缓存（singletonFactories）**可以存储`ObjectFactory`工厂，用于生成Bean的**早期引用（可能是代理对象）**。如若A被AOP代理，则通过`ObjectFactory`提前暴露代理对象，而非原始对象。
+A：**一级缓存**（singletonObjects）用来存储完全初始化好的单例Bean（成品对象）。但**三级缓存（singletonFactories）** 可以存储`ObjectFactory`工厂，用于生成Bean的**早期引用（可能是代理对象）**。如若A被AOP代理，则通过`ObjectFactory`提前暴露代理对象，而非原始对象。
 
 而**二级缓存（earlySingletonObjects）**作用在于当一个 Bean 正在创建过程中，其他依赖于它的 Bean 可能会请求该 Bean。此时，Spring 可以从二级缓存中获取该 Bean 的早期引用，从而避免再次执行三级缓存中的 `ObjectFactory.getObject()`，提高性能。
 
@@ -1942,15 +1942,15 @@ Spring Boot的自动装配是通过 `@EnableAutoConfiguration` 注解触发的�
 当一个项目的主类启动时，SpringBoot自动装配步骤如下：
 
 ##### 1. 触发自动装配
-对于SpringBoot项目项目的主类（启动类）有`@SpringBootApplication` 注解，这个注解一个多个注解所组成的联合注解，其中 `@EnableAutoConfiguration`是完成自动装配最核心的注解在启动时激活自动配置。
+对于SpringBoot项目项目的主类（启动类）有`@SpringBootApplication` 注解，这个注解一个多个注解所组成的联合注解，其中 `@EnableAutoConfiguration`是完成自动装配最核心的注解在启动时激活自动配置，而`@ComponentScan`注解会扫描启动类所在包及子包，将标注了 @Component、@Service、 @Controller、@Repository 等注解的类注册到容器中。
 
 
 
 ##### 2. 加载自动配置类
 
-而`@EnableAutoConfiguration`又包含
+`@ComponentScan`注解会扫描启动类所在包及子包，将标注了 @Component、@Service、 @Controller、@Repository 等注解的类注册到容器中。
 
-* `@AutoConfigurationPackage`，将项目src中main包下的所有组件注册到容器中，例如标注了Component注解的类等，不负责SpringBoot**自动加载并配置所需的组件**（如数据源、Web框架）Bean的注册。
+`@EnableAutoConfiguration`又包含
 
 - `@Import({AutoConfigurationImportSelector.class})`，是自动装配的核心，实现了 ImportSelector 接口会扫描所有依赖的 `META-INF/spring.factories` 文件（这个文件中包含了各种 Spring 配置和扩展的定义，由SpringBoot框架开发者维护和更新），加载其中定义的自动配置类（如 `DataSourceAutoConfiguration`）。
 
