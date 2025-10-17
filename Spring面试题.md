@@ -1510,13 +1510,12 @@ public class GlobalExceptionHandler {
 
 * **注册自动配置**
 
-  在 `META-INF/spring.factories` 文件中，将 `PermissionAutoConfiguration` 注册为自动配置类。
+在 `META-INF/spring.factories` 文件中，将 `PermissionAutoConfiguration` 注册为自动配置类。
 
-  ```properties
-  org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.example.PermissionAutoConfiguration
-  ```
+```properties
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.example.PermissionAutoConfiguration
+```
 
-  
 
 整个应用过程分为三步：
 
@@ -1739,7 +1738,7 @@ Spring Boot是基于Spring且是Spring的扩展，传统的Spring更适合需要
 | **微服务支持**   | 需额外整合Spring Cloud组件。             | 天然支持微服务，与Spring Cloud无缝集成。       |
 | **开发效率**     | 适合需要深度定制化的大型企业级应用。     | 适合快速迭代、中小型项目或微服务架构。         |
 
-
+```
 
 #### SpringBoot用到哪些设计模式？
 
