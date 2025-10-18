@@ -108,9 +108,7 @@ git push origin branch_xiaopang
 ```
 
 **也可以在GitHub网页上创建：**
-
-![[Create branch.png]]
-
+![创建分支示例](./文档图片/create-branch.png)
 
 ---
 
