@@ -1400,7 +1400,7 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 
 
-#### 什么是 BlockingQueue？*
+#### 什么是 BlockingQueue？
 
 `BlockingQueue` 是属于juc包下的线程安全队列的一种类型，底下的话包括了很多具体的事情。
 
