@@ -426,7 +426,7 @@ A：**fail-fast** 和 **fail-safe** 是两种不同的错误处理设计哲学�
 
 
 
-#### **迭代器的实现原理？** *
+#### **迭代器的实现原理？** 
 
 集合的遍历方式：迭代器遍历、增强for遍历、Lambda表达式遍历等等  
 除了普通for遍历几乎所有其他便利方式，的底层实现也是调用迭代器的方法遍历。
@@ -917,7 +917,7 @@ static final int hash(Object key) {
 
 
 
-#### 重写HashMap的equal和hashcode方法需要注意什么？*
+#### 重写HashMap的equal和hashcode方法需要注意什么？
 
 HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的索引位置。且不管是写入 put() 和读取get() 操作， hashCode() 和 equals() 方法被用到。
 
@@ -934,7 +934,7 @@ HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的
 
 
 
-#### 重写HashMap的equal方法不当会出现什么问题？*
+#### 重写HashMap的equal方法不当会出现什么问题？
 
 HashMap使用Key对象的 hashCode() 和 equals() 方法去决定key-value对的索引位置。而且HashMap在比较元素时，会先通过hashCode进行比较，相同的情况下再通过equals进行比较。**所以 equals相等的两个对象，hashCode一定相等。hashCode相等的两个对象，equals不一定相等（比如散列冲突的情况）**
 
@@ -1061,7 +1061,7 @@ Java的hashMap初始数组大小是16，当插入 20 个元素时，HashMap 的�
 
 
 
-#### 说说hashmap的负载因子？*
+#### 说说hashmap的负载因子？
 
 HashMap 负载因子 loadFactor 的默认值是 0.75，当 HashMap 中的元素个数超过了容量的 75% 时，就会进行扩容。
 
@@ -1096,7 +1096,7 @@ Hashmap和Hashtable两者最大的区别就是Hashmap线程不安全而Hashtable
 
 
 
-#### ConcurrentHashMap怎么实现的？*
+#### ConcurrentHashMap怎么实现的？
 
 ConcurrentHashMap在不同版本的jdk中实现比较大，我们分开来讲
 
@@ -1129,7 +1129,7 @@ ConcurrentHashMap在不同版本的jdk中实现比较大，我们分开来讲
 
 
 
-##### 追问Q： JDK 1.7 `ConcurrentHashMap` 怎么定位到哪个 `Segment`的？*
+##### 追问Q： JDK 1.7 `ConcurrentHashMap` 怎么定位到哪个 `Segment`的？
 
 A：通过**哈希值**来计算一个键应该映射到哪个 `Segment`。每个 `Segment` 对应一个 **哈希表**，它有自己的锁。要定位到具体的 `Segment`，需要根据键的哈希值计算出一个分段索引。
 
@@ -1151,7 +1151,7 @@ int index = (hash & (table.length - 1));
 
 
 
-#### 分段锁怎么加锁的？*
+#### 分段锁怎么加锁的？
 
 在 JDK 1.7 `ConcurrentHashMap` 中，将整个数据结构分为多个 Segment，每个 Segment 都类似于一个小的 HashMap，每个 Segment 都有自己的锁，不同 Segment 之间的操作互不影响，从而提高并发性能。
 
@@ -1170,14 +1170,53 @@ int index = (hash & (table.length - 1));
 具体`ReentrantLock`怎么实现了可重入请看[[Java并发编程面试题#synchronized和reentrantlock支持重入吗？如何实现的?]]。
 
 
+#### ConcurrentHashMap读操作为何无锁？*
+通过`volatile`关键字修饰数组引用、节点的next指针和value值，保证内存可见性，读线程能实时看到最新数据。
+##### 1. 正常读取（无碰撞/有碰撞）
 
-#### 已经用了synchronized，为什么还要用CAS呢？
+数组、next指针、val都被`volatile`修饰，读线程直接遍历即可，不需要加锁。
 
-ConcurrentHashMap同时使用来保证线程安全主要是一种权衡的考虑，主要是根据锁竞争程度来判断的。
 
-如在put方法中，如果计算出来的哈希槽没有存放元素，那么就可以直接使用CAS来进行设置值，这是因为在设置元素的时候，因为hash值经过了各种扰动后，造成hash碰撞的几率较低，那么我们可以预测使用较少的自旋来完成具体的hash落槽操作。
+##### 2. 扩容期间的读取
 
-当发生了hash碰撞的时候说明容量不够用了或者已经有大量线程访问了，因此这时候使用synchronized来处理hash碰撞比CAS效率要高，因为发生了hash碰撞大概率来说是线程竞争比较强烈。
+ConcurrentHashMap采用渐进式迁移，类似Redis的rehash：
+
+1. 读线程先在**当前表（旧表）** 查找对应槽位
+2. 如果该槽位已经被标记为ForwardingNode（说明已迁移），则调用ForwardingNode的find方法去**新表**查找
+3. 如果旧表槽位还是普通节点，则直接在旧表遍历查找
+
+
+##### 3. 链表转红黑树期间的读取
+
+这是最巧妙的设计：
+
+- TreeBin内部同时维护两种结构：链表（first指针）和红黑树（root指针）
+- 转换过程在synchronized块中进行，但构建的是私有的TreeBin对象
+- 读线程在转换期间读的仍然是原链表，不受影响
+- 转换完成后，通过`volatile`的原子切换，槽位引用指向TreeBin
+- 之后读线程看到TreeBin，如果有写锁就降级走链表，无写锁则走红黑树（O(log n)更快）
+
+
+
+
+#### 已经用了synchronized，为什么还要用CAS呢？*
+
+ConcurrentHashMap结合CAS和synchronized是性能优化的体现：
+
+1. **槽位为空时用CAS**：竞争小，CAS自旋几次就能成功，且避免了加锁开销。同时此时也没有对象可以作为锁对象。
+2. **槽位有元素时用synchronized**：需要遍历链表或红黑树进行复杂操作，这些操作无法用CAS保证原子性。此时可以用槽位首节点作为锁对象，synchronized在JDK 6+已经过深度优化，在有一定竞争时效率很高。
+3. **性能考量**：简单操作用CAS（乐观锁），复杂操作用synchronized（悲观锁），这样在不同竞争程度下都能获得较好性能。
+
+
+
+
+#### 为什么1.8使用的是synchronized，而不是ReentrantLock？*
+
+- **性能相当**：synchronized在JDK 6+经过大量优化（偏向锁、轻量级锁、适应性自旋），在中低竞争场景下性能接近甚至优于ReentrantLock
+- **内存占用**：ConcurrentHashMap是桶级别锁，如果用ReentrantLock，每个槽位都需要创建一个独立的锁对象。synchronized可利用哈希槽中的第1个对象的监视器锁来实现线程安全，不需要额外的对象。
+- **功能够用**：这里只需要基本的互斥功能，不需要ReentrantLock的高级特性（公平锁、条件变量、可中断、tryLock等）
+
+
 
 
 
@@ -1334,9 +1373,9 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 - **有序的 Set 是TreeSet和LinkedHashSet**。TreeSet是基于红黑树实现，保证元素的自然顺序。LinkedHashSet是基于双重链表和哈希表的结合来实现元素的有序存储，保证元素添加的自然顺序
 - **记录插入顺序的集合通常指的是LinkedHashSet**，它不仅保证元素的唯一性，还可以保持元素的插入顺序。当需要在Set集合中记录元素的插入顺序时，可以选择使用LinkedHashSet来实现。
 
-### Queue与Deque*
+### Queue与Deque
 
-#### ArrayDeque 与 LinkedList 的区别*
+#### ArrayDeque 与 LinkedList 的区别
 
 `ArrayDeque` 和 `LinkedList` 都实现了 `Deque` 和 `queue` 接口，两者都具有队列的功能，但：
 
@@ -1347,7 +1386,7 @@ A：**伸缩性**（Scalability）指的是一个系统、网络、应用程序�
 
 从性能的角度上，选用 `ArrayDeque` 来实现队列要比 `LinkedList` 更好。
 
-#### 说一说 PriorityQueue*
+#### 说一说 PriorityQueue
 
 `PriorityQueue` 底层的话是基于数组的结构来实现，采用了堆的思想，诗词按照元素自然顺序或者指定的比较器来进行出队元素，即总是优先级最高的元素先出队。
 
@@ -1398,7 +1437,7 @@ Java 中常用的阻塞队列实现类有以下几种：
 | PriorityBlockingQueue | 堆    | 优先级队列  | ReentrantLock | 优先级排序场景   | 好   | 无界（自动扩容）   |
 | DelayQueue            | 堆    | 延迟获取   | ReentrantLock | 延迟任务场景    | 好   | 无界         |
 
-#### BlockingQueue和ConcurrentLinkedQueue区别？*
+#### BlockingQueue和ConcurrentLinkedQueue区别？
 
 **ConcurrentLinkedQueue**
    **无锁、无界、非阻塞**的队列实现，适用于高并发场景。通过 CAS 操作实现高性能，通常在高并发情况下性能优于 `BlockingQueue`，无容量限制。
