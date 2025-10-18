@@ -108,7 +108,9 @@ git push origin branch_xiaopang
 ```
 
 **也可以在GitHub网页上创建：**
-![[Pasted image 20251018202850.png]]
+
+![[Create branch.png]]
+
 
 ---
 
