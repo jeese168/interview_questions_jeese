@@ -14,7 +14,7 @@ JMM的核心目的是确保在并发环境中多线程操作共享变量时的**
 
 ### 多线程
 
-#### 什么是线程和进程？（JavaGuide）
+#### 什么是线程和进程？（JavaGuide）*
 
 **进程是程序的一次执行过程，是系统运行程序的基本单位**，因此进程相比程序是动态的，进程具有隔离性和独立性。
 
@@ -26,7 +26,7 @@ JMM的核心目的是确保在并发环境中多线程操作共享变量时的**
 
 
 
-#### ⭐️java里面的线程和操作系统的线程一样吗？
+#### ⭐️java里面的线程和操作系统的线程一样吗？*
 
 JDK 1.2 之前，Java 线程是一种用户级线程（用户线程），也就是说 JVM 自己来管控多线程的切换和运行，而不依赖于操作系统在内核中只有一个线程与jvm进程对应，属于是一对多的线程模型。但由于用户级线程和内内核级线程比起来在使用时有一些限制（比如用户级线程不能直接使用操作系统提供的功能如异步 I/O、只能在一个内核线程上运行无法利用多核）。
 
@@ -41,7 +41,7 @@ JDK 1.2 之前，Java 线程是一种用户级线程（用户线程），也就�
 
 **Q：什么是线程模型？**
 
-**A：**即考研时学过的一对一、一对多和多对多线程模型。
+**A：** 即考研时学过的一对一、一对多和多对多线程模型。
 
 **1. 一对一线程模型**
 
@@ -89,7 +89,7 @@ JDK 1.2 之前，Java 线程是一种用户级线程（用户线程），也就�
 
 
 
-#### 使用java多线程开发要注意哪些问题？
+#### 使用java多线程开发要注意哪些问题？*
 
 **需要注意线程安全的问题，即不要出现数据竞争造成的数据混乱的问题。**
 
@@ -118,9 +118,26 @@ A： happens-before 原则是为了程序员和编译器、处理器之间的平
 
 ####  保证数据的一致性有哪些方案呢？
 
+
+**单体应用的一致性方案**
+
 - **事务管理**：使用数据库事务来确保一组数据库操作要么全部成功提交，要么全部失败回滚。通过ACID（原子性、一致性、隔离性、持久性）属性，数据库事务可以保证数据的一致性。
 - **锁机制**：使用锁来实现对共享资源的互斥访问。在 Java 中，可以使用 synchronized 关键字、ReentrantLock 或其他锁机制来控制并发访问，从而避免并发操作导致数据不一致。
 - **版本控制**：通过乐观锁的方式，在更新数据时记录数据的版本信息，从而避免同时对同一数据进行修改，进而保证数据的一致性。
+
+
+
+**分布式场景的一致性方案**
+
+分布式事务可以用TCC模式，分为Try、Confirm、Cancel三个阶段，Try阶段预留资源比如冻结账户余额，Confirm阶段真正执行扣款，失败了就Cancel回滚。也可以用Seata这类框架来实现分布式事务，它会协调多个服务的本地事务。
+
+最终一致性是分布式系统常用的方案，不追求实时一致而是允许短暂不一致但最终会达到一致状态。比如订单服务创建订单后发消息到MQ，库存服务异步消费消息扣减库存，如果失败了通过补偿机制重试或人工介入。还有本地消息表的方案，在创建订单的同一个事务里插入一条消息记录，然后定时任务扫描消息表发送到MQ，保证消息一定会发出去。
+
+Saga模式把分布式事务拆成多个本地事务，每个事务都有对应的补偿操作，比如订单服务创建订单对应取消订单，库存服务扣库存对应恢复库存，如果中间某一步失败就执行之前所有步骤的补偿操作。
+
+分布式锁用来保证多个服务访问共享资源时的互斥，可以用Redis的SETNX命令实现，设置过期时间防止死锁。也可以用Zookeeper的临时顺序节点，或者直接用数据库的SELECT FOR UPDATE行锁。
+
+幂等性设计保证重复请求不会造成数据错误，可以用全局唯一ID配合Redis缓存判断是否重复请求，或者在数据库表上加唯一索引比如订单号，重复插入会报错。
 
 
 
@@ -472,16 +489,20 @@ JVM有很多实现，比较流行的就是hotspot，hotspot对notofy()的实现�
 
 
 #### ⭐️为什么要使用多线程?（JavaGuide）
+使用多线程的核心目的是**最大化硬件资源利用率**与**提升程序响应性、吞吐量**，本质是让程序能更高效地处理 “并发任务”，适配现代计算机的多核架构和复杂业务场景。
+##### 1. 充分利用 CPU 资源，解决 “IO 阻塞” 与 “多核闲置” 问题
 
-先从总体上来说：
+- **单线程的瓶颈**：单线程程序在执行 IO 操作（如磁盘读写、网络请求、数据库查询）时，会进入阻塞状态（CPU 空闲），只能等待 IO 完成后才能继续执行，导致 CPU 资源严重浪费（“CPU 等 IO”）。
+- **多线程的优化**：通过多线程，可将 “IO 阻塞任务” 与 “计算任务” 拆分 —— 当一个线程因 IO 阻塞时，CPU 可切换到其他就绪线程执行计算，避免闲置。例如：
+    - 下载文件时，一个线程负责网络读取（IO 阻塞），另一个线程负责实时显示下载进度（计算任务），CPU 无需等待 IO 完成，利用率大幅提升。
+    - 在多核 CPU 中，多线程可让不同任务并行运行在不同核心上（如一个核心解码视频，一个核心处理用户交互），直接利用多核算力，提升整体吞吐量。
 
-- **从计算机底层来说：** 线程可以比作是轻量级的进程，是程序执行的最小单位,线程间的切换和调度的成本远远小于进程。另外，多核 CPU 时代意味着多个线程可以同时运行，这减少了线程上下文切换的开销。
-- **从当代互联网发展趋势来说：** 现在的系统动不动就要求百万级甚至千万级的并发量，而多线程并发编程正是开发高并发系统的基础，利用好多线程机制可以大大提高系统整体的并发能力以及性能。
+##### 2. 提升程序响应性，支持 “多任务并发” 的业务场景
 
-再深入到计算机底层来探讨：
-
-- **单核时代**：在单核时代多线程主要是为了提高单进程利用 CPU 和 IO 系统的效率。 假设只运行了一个 Java 进程的情况，当我们请求 IO 的时候，如果 Java 进程中只有一个线程，此线程被 IO 阻塞则整个进程被阻塞。CPU 和 IO 设备只有一个在运行，那么可以简单地说系统整体效率只有 50%。当使用多线程的时候，一个线程被 IO 阻塞，其他线程还可以继续使用 CPU。从而提高了 Java 进程利用系统资源的整体效率。
-- **多核时代**: 多核时代多线程主要是为了提高进程利用多核 CPU 的能力。举个例子：假如我们要计算一个复杂的任务，我们只用一个线程的话，不论系统有几个 CPU 核心，都只会有一个 CPU 核心被利用到。而创建多个线程，这些线程可以被映射到底层多个 CPU 核心上执行，在任务中的多个线程没有资源竞争的情况下，任务执行的效率会有显著性的提高，约等于（单核时执行时间/CPU 核心数）。
+- **单线程的局限**：单线程程序中任务只能 “串行执行”，若某个任务耗时较长（如大数据计算、文件解析），会导致整个程序 “卡死”，无法响应其他操作。例如：
+    - 早期单线程音乐播放器，需等待 “文件加载→解码→播放” 串行完成，期间无法响应 “暂停、切换歌曲” 等用户操作，体验极差。
+- **多线程的优势**：通过多线程拆分任务，可让 “耗时任务” 与 “交互任务” 并行，保证程序始终响应。例如：
+    - 现代音乐播放器用 3 个线程分工：`加载线程`（读磁盘）、`解码线程`（处理数据）、`播放线程`（输出音频），同时用独立线程处理用户点击（如暂停、切歌）—— 用户操作无需等待加载 / 解码完成，程序响应更流畅，这就是你提到的 “支持丰富软件功能” 的底层逻辑。
 
 
 
@@ -511,7 +532,7 @@ JVM有很多实现，比较流行的就是hotspot，hotspot对notofy()的实现�
 
 
 
-#### 使用多线程可能带来什么问题?（JavaGuide）
+#### 使用多线程可能带来什么问题?（JavaGuide）*
 
 首先多线程使用不当的话就会出现线程间静态条件导致并发不安全的情况导致并发执行数据混乱，进而导致数据的一致性被破坏。
 为了保证一致性要引入额外的同步资源，而同步的话又需要消耗一定的资源或者时间成本。
@@ -688,6 +709,17 @@ Java中的JUC库（`java.util.concurrent`）定义了一种锁也叫做读写锁
 自旋锁的特性在于在等待锁时会持续循环检查锁是否可用，而不是放弃CPU并阻塞。通常可以使用CAS来实现。
 
 **若在锁等待时间很短的情况下会比synchronized关键字等阻塞锁有更好的性能，但过度自旋会浪费CPU资源。**
+
+
+#### 似乎自旋锁和乐观锁很相似都用CAS，是一个东西吗？*
+
+- **乐观锁**：是一种并发控制思想，通常利用CAS操作配合volatile关键字对变量进行原子性修改。更高级的实现可能会使用版本号或时间戳来检测冲突。**没有真正的"锁"，通过冲突检测和重试来保证正确性**。
+- **自旋锁**：是一种锁的实现方式，**本质上仍是悲观锁**。通过CAS尝试**原子地获取锁**，判断锁状态是否为"未占用"，如果是就将其改为"已占用"。如果获取失败，不会阻塞线程，而是在循环中反复尝试（自旋），直到锁被释放。这种忙等待的方式避免了线程上下文切换的开销。
+- **关系**：
+    - CAS是一种原子操作技术
+    - 乐观锁和自旋锁都可以使用CAS来实现
+    - 但乐观锁是"无锁"思想，自旋锁是"有锁但忙等待"的实现
+    - 两者解决的问题角度不同：乐观锁关注如何避免加锁，自旋锁关注如何高效地等待锁
 
 
 
@@ -881,12 +913,15 @@ condition.signal();
 
 
 ##### 3.  应用场景的区别
+synchronized适用于
+- 场景需求单一，支持可重入的原子性锁。
+- 中低并发情况下且临界区代码简单快速（因为中低并发情况下，轻量级锁通过忙等待的方式就能实现原子性性能更优）
+- 直线更细粒度级别而且能够获取现成的对象当锁的载体，推荐使用。（更加节省内存，不需要额外的锁对象）
+- 此外若对象状态与锁代码紧紧相关时，使用synchronized关键字会更好
 
-若应用场景对锁功能要求不高可以使用synchronized，相反若有公平锁、锁中断、超时中断等功能则得用ReentrantLock。
+相反若有公平锁、锁中断、超时中断和多个条件变量等功能则得用ReentrantLock。在线程竞争激烈的情况下也推荐使用ReentrantLock提供更优的性能。
 
-synchronized关键字除了对代码块进行同步还可对方法进行同步，而ReentrantLock一般对代码块进行同步，但ReentrantLock支持更复杂的同步结构如与配套的`Condition`对象实现使用多个条件变量。
-
-此外，synchronized关键字本质上是对象的监视锁，若对象状态与锁代码紧紧相关时，使用synchronized关键字会更好。而ReentrantLock在大多数情况等下可以提供比synchronized关键字更好的性格。选择哪种同步机制取决于具体的应用需求和性能考虑。
+选择哪种同步机制取决于具体的应用需求和性能考虑。
 
 
 
@@ -1106,7 +1141,7 @@ A：全都是基于AQS实现，通过 `LockSupport.park()`来将线程变为wait
 
 悲观锁如其名字所言，认为并发进程运行总是会存在竞争问题。于是对共享资源加上独占独占锁，synchronized和reentrantlock是典型的悲观锁
 
-而乐观锁相反，认为当前并发进程运行环境不总会发生竞争问题，通过CAS操作去修改内存的共享变量，如果失败则表示冲突，自选锁就是典型的乐观锁。
+而乐观锁相反，认为当前并发进程运行环境不总会发生竞争问题，实际上没有任何锁，而是通过一种冲突检测的思想，实际CAS操作去修改内存的共享变量，如果失败则表示冲突。
 
 
 
@@ -1180,7 +1215,7 @@ boolean compareAndSwapLong(Object o, long offset, long expected, long x);
 
 
 
-#### 说一下Java并发编程中的原子类？*
+#### 说一下Java并发编程中的原子类？
 
 `java.util.concurrent.atomic` 包提供了一些用于原子操作的类。这些类利用底层的原子指令，确保在多线程环境下的操作是线程安全的。
 
@@ -1334,7 +1369,7 @@ Volatile解决了变量在多线程环境下的可见性和有序性问题，确
 
 
 
-#### 什么是公平锁和非公平锁？
+#### 什么是公平锁和非公平锁？*
 
 **公平锁：** 指多个线程按照申请锁的顺序来获取锁，线程直接进入队列中排队，队列中的第一个线程才能获得锁。
 
@@ -1358,7 +1393,7 @@ Synchronized不是公平锁
 
 
 
-#### ReentrantLock是怎么实现公平锁的？
+#### ReentrantLock是怎么实现公平锁的？*
 
 **ReentrantLock** 基于 **AQS** 实现的，原先 **AQS** 有三大组成部分状态：state；控制线程抢锁和配合的FIFO队列（双向链表）；期望协作工具类去实现的获取/释放等重要方法（重写）。
 
@@ -1795,7 +1830,7 @@ A：主要它是 **非阻塞**、**无界** 的，可能导致 **OOM**。此外�
 
 对于CPU密集性任务，核心线程数设置为CPU核心数+1。`+1` 的作用是 **应对线程上下文切换**（如系统 I/O、GC 等），可以稍微提高吞吐量。
 
-对于I/O密集型任务，核心线程数设置为CPU核心数*2。I/O 任务（如 **数据库查询、文件读写、网络请求**）的 **CPU 计算占比小**，大部分时间线程都在 **等待 I/O 响应**，所以可以有更多线程来提高并发度。
+对于I/O密集型任务，核心线程数设置为CPU核心数 * 2。I/O 任务（如 **数据库查询、文件读写、网络请求**）的 **CPU 计算占比小**，大部分时间线程都在 **等待 I/O 响应**，所以可以有更多线程来提高并发度。
 
 
 
@@ -1823,7 +1858,7 @@ CPU 密集型简单理解就是利用 CPU 计算能力的任务比如你在内�
 
 
 
-#### 核心线程数设置为0可不可以？（似乎很重要）
+#### 核心线程数设置为0可不可以？（似乎很重要）*
 
 可以，这表示线程池中的保持活跃的最大线程数量为0。当有任务提交时，线程池会创建线程来执行。执行结束后线程空闲时间要是超过空闲线程存活时间**keepAliveTime**，就会销毁。
 
@@ -1879,7 +1914,7 @@ shutdownNow()调用后，线程池状态状态会变为STOP，会尝试中断所
 
 
 
-#### 提交给线程池中的任务可以被撤回吗？*
+#### 提交给线程池中的任务可以被撤回吗？* （扩充）
 
 可以，当向线程池提交任务时，会得到一个`Future`对象。这个`Future`对象提供了几种方法来管理任务的执行，包括取消任务。
 
@@ -1933,7 +1968,7 @@ public static void main(String[] args) {
 
 
 
-#### ⭐️线程池中线程异常后，销毁还是复用？
+#### ⭐️线程池中线程异常后，销毁还是复用？*
 
 直接说结论，需要分两种情况：
 
@@ -1968,7 +2003,7 @@ java自提供的`ThreadPoolExecutor` 类了下面这些方法来修改重要参�
 
 
 
-#### **上线后你会关注线程池的哪些指标？**
+#### 上线后你会关注线程池的哪些指标？*
 
 1. **运行时状态**
    - 核心线程数：当前活跃的核心线程数量
@@ -1993,7 +2028,7 @@ java自提供的`ThreadPoolExecutor` 类了下面这些方法来修改重要参�
 
 
 
-### Future
+### Future*
 
 #### Future 类有什么用？
 
@@ -2057,81 +2092,105 @@ public interface Future<V> {
 
 
 
-#### CompletableFuture 类有什么用？*
+#### CompletableFuture 类有什么用？ *
 
-`Future` 在实际使用过程中存在一些局限性比如不支持异步任务的编排组合、**获取计算结果的 `get()` 方法为阻塞调用。**
+CompletableFuture解决了传统Future的核心问题：get方法阻塞线程、不支持任务编排、异常处理不便。它通过三个核心能力彻底改善了异步编程体验。
 
-Java 8 才被引入`CompletableFuture` 类可以解决`Future` 的这些缺陷。`CompletableFuture` 除了提供了更为好用和强大的 `Future` 特性之外，还提供了函数式编程、异步任务编排组合（可以将多个异步任务串联起来，组成一个完整的链式调用）等能力。
+##### 1. 异步任务编排
 
- `CompletableFuture` 类的定义，表明同时实现了 `Future` 和 `CompletionStage` 接口。
+CompletableFuture提供了丰富的方法来组合多个异步任务。thenApply和thenCompose可以把任务串联起来，前一个任务的结果自动传给下一个任务。allOf可以等待所有任务完成，anyOf可以等待最快的任务完成。这比用CountDownLatch或手动管理线程简洁很多。
+
+
 
 ```java
-public class CompletableFuture<T> implements Future<T>, CompletionStage<T> {
-}
+//例1：串行任务
+
+CompletableFuture.supplyAsync(() -> {
+    return "用户ID:123";
+}).thenApply(userId -> {
+    // 根据用户ID查订单
+    return "订单号:456";
+}).thenAccept(order -> {
+    System.out.println("查到订单：" + order);
+});
+
+//例2：并行任务等待所有完成
+CompletableFuture<String> task1 = CompletableFuture.supplyAsync(() -> "结果1");
+CompletableFuture<String> task2 = CompletableFuture.supplyAsync(() -> "结果2");
+
+CompletableFuture.allOf(task1, task2).thenRun(() -> {
+    System.out.println("所有任务完成");
+});
 ```
 
-![img](https://oss.javaguide.cn/github/javaguide/java/concurrent/completablefuture-class-diagram.jpg)
 
-`CompletionStage` 接口描述了一个异步计算的阶段。很多计算可以分成多个阶段或步骤，此时可以通过它将所有步骤组合起来，形成异步计算的流水线。
+##### 2. 非阻塞获取结果
 
-`CompletionStage` 接口中的方法比较多，`CompletableFuture` 的函数式能力就是这个接口赋予的。从这个接口的方法参数，可以发现其大量使用了 Java8 引入的函数式编程。
+不需要调用get方法阻塞等待，可以用thenAccept、whenComplete等方法注册回调，任务完成后自动触发回调逻辑，主线程不会被阻塞。这样可以充分利用CPU资源，主线程可以继续处理其他请求。
 
-![img](文档图片/image-20210902093026059.png)
 
-举个代码例子来说，假设我们有两个异步任务：
-
-1. 任务 A：获取用户信息。
-2. 任务 B：根据用户信息获取订单信息。
-
-我们希望通过 `CompletableFuture` 实现以下功能：
-
-- 并行执行任务 A 和任务 B。
-- 当任务 A 和任务 B 都完成时，将结果合并并输出。
 
 ```java
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+//例1：thenAccept()回调处理结果
+CompletableFuture.supplyAsync(() -> {
+    // 模拟耗时查询
+    Thread.sleep(2000);
+    return "查询结果";
+}).thenAccept(result -> {
+    // 任务完成后自动执行，不阻塞主线程
+    System.out.println("处理结果：" + result);
+});
+System.out.println("主线程继续执行");  // 不会被阻塞
 
-public class CompletableFutureFunctionalExample {
-    public static void main(String[] args) {
-        // 模拟任务 A：获取用户信息
-        CompletableFuture<String> userFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(2000); // 模拟耗时操作
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return "用户信息: 张三"; // 返回用户信息
-        });
 
-        // 模拟任务 B：获取订单信息
-        CompletableFuture<Integer> orderFuture = CompletableFuture.supplyAsync(() -> {
-            try {
-                Thread.sleep(1000); // 模拟耗时操作
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            return 12345; // 返回订单编号
-        });
-
-        // 当任务 A 和任务 B 都完成时，合并结果
-        CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(userFuture, orderFuture)
-                .thenAcceptBoth(userFuture, orderFuture, (user, order) -> {
-                    System.out.println("用户信息: " + user);
-                    System.out.println("订单信息: 订单编号 " + order);
-                });
-
-        // 等待所有任务完成
-        try {
-            combinedFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+//例2：whenComplete()处理结果和异常
+CompletableFuture.supplyAsync(() -> {
+    Thread.sleep(1000);
+    return "任务完成";
+}).whenComplete((result, ex) -> {
+    // 任务完成或异常时都会执行
+    if (ex == null) {
+        System.out.println("成功：" + result);
+    } else {
+        System.out.println("失败：" + ex.getMessage());
     }
-}
+});
+System.out.println("主线程不等待");  // 继续执行
+
 ```
 
-这上面的例子中`CompletableFuture` 通过函数式接口（如 `Supplier`、`Function`、`Consumer` 等）实现了对异步任务的编排和组合。也大量使用链式调用和lamda表达式方式非常适合函数式编程，可以将多个异步任务串联起来，形成一个完整的异步计算流水线。
+##### 3. 便捷异常处理
+
+提供了exceptionally和handle方法可以在任务链路中直接捕获和处理异常，不用等到get时才发现出错。exceptionally可以在异常时返回默认值，handle可以同时处理正常结果和异常情况，避免异常被隐藏。
+
+
+```java
+// 例1：异常时返回默认值
+CompletableFuture.supplyAsync(() -> {
+    if (Math.random() > 0.5) {
+        throw new RuntimeException("查询失败");
+    }
+    return "正常结果";
+}).exceptionally(ex -> {
+    // 出现异常时返回默认值
+    return "默认结果";
+}).thenAccept(result -> {
+    System.out.println(result);  // 不管成功失败都能拿到结果
+});
+
+//例2：同时处理成功和失败
+CompletableFuture.supplyAsync(() -> {
+    return 100 / 0;  // 会抛异常
+}).handle((result, ex) -> {
+    if (ex != null) {
+        return "发生错误：" + ex.getMessage();
+    }
+    return "结果：" + result;
+}).thenAccept(System.out::println);
+```
+
+CompletableFuture实现了CompletionStage接口，支持函数式编程，可以用lambda表达式把多个异步操作链式组合，代码简洁易读，是Java处理异步任务的首选工具。
+
 
 
 
@@ -2150,21 +2209,74 @@ public class CompletableFutureFunctionalExample {
 
 
 
-#### ⭐️使用 CompletableFuture，有一个任务失败，如何处理异常？
+#### ⭐️使用 CompletableFuture，有一个任务失败，如何处理异常？*
 
-`CompletableFuture` 提供了多种方法来处理异步任务中的异常，确保异常不会丢失，并能以可控的方式进行处理。
+使用CompletableFuture时，如果任务失败了，有三种主要的异常处理方式，分别适用于不同场景。
 
-* 使用 `CompletableFuture.allOf` 方法可以组合多个 `CompletableFuture`，并统一处理所有任务的异常，而不是让异常处理过于冗长或重复。
+##### 1. exceptionally - 捕获异常并返回默认值
 
-- 使用 `whenComplete` 方法可以在任务完成时触发回调函数，并正确地处理异常，而不是让异常被吞噬或丢失。
+当任务抛出异常时，用exceptionally可以捕获异常并返回一个默认值，让后续任务继续执行。这适合需要兜底方案的场景，比如查询失败时返回缓存数据。
 
-- 使用 `exceptionally` 方法可以处理异常并重新抛出，以便异常能够传播到后续阶段，而不是让异常被忽略或终止。
+```java
+CompletableFuture.supplyAsync(() -> {
+    if (someCondition) {
+        throw new RuntimeException("查询失败");
+    }
+    return "正常数据";
+}).exceptionally(ex -> {
+    System.out.println("捕获异常：" + ex.getMessage());
+    return "默认数据";  // 返回兜底值
+}).thenAccept(result -> {
+    System.out.println("最终结果：" + result);  // 不管成功失败都能拿到值
+});
+```
 
-- 使用 `handle` 方法可以处理正常的返回结果和异常，并返回一个新的结果，而不是让异常影响正常的业务逻辑。
+##### 2. handle - 同时处理成功和失败
+
+handle方法可以同时处理正常结果和异常，无论任务成功还是失败都会执行。它接收两个参数：result（正常结果）和exception（异常对象），可以根据exception是否为null判断任务是否成功。这适合需要统一处理逻辑的场景。
+
+```java
+CompletableFuture.supplyAsync(() -> {
+    return 100 / 0;  // 会抛异常
+}).handle((result, ex) -> {
+    if (ex != null) {
+        System.out.println("任务失败：" + ex.getMessage());
+        return -1;  // 返回错误码
+    }
+    System.out.println("任务成功：" + result);
+    return result;
+}).thenAccept(finalResult -> {
+    System.out.println("处理结果：" + finalResult);
+});
+```
+
+##### 3. whenComplete - 处理但不改变结果
+
+whenComplete和handle类似，也能同时处理成功和失败，但它不能修改返回值，只能做日志记录、资源清理等操作。如果任务异常，异常会继续向后传播。这适合做监控统计或清理工作。
+
+```java
+CompletableFuture.supplyAsync(() -> {
+    throw new RuntimeException("任务失败");
+}).whenComplete((result, ex) -> {
+    if (ex != null) {
+        System.out.println("记录异常日志：" + ex.getMessage());
+    } else {
+        System.out.println("记录成功日志：" + result);
+    }
+    // 不能返回值，异常会继续传播
+}).exceptionally(ex -> {
+    return "兜底值";  // 这里再捕获异常
+});
+```
+
+##### 4. 多任务场景的异常处理
+
+当用allOf组合多个任务时，只要有一个任务失败，allOf就会失败，所以可以利用handle或exceptionally在allOf后统一处理异常，减少每个子任务单独加异常处理的复杂逻辑。
+
 
   
 
-#### ⭐️在使用 CompletableFuture 的时候为什么要自定义线程池？
+#### ⭐️在使用 CompletableFuture 的时候为什么要自定义线程池？*
 
 主要是因为`CompletableFuture` 默认使用JVM全局共享的 `ForkJoinPool.commonPool()` 作为执行器，意味着应用程序、多个库或框架（如 Spring、第三方库）通过 `CompletableFuture`回调，如果不指明线程池就会用`ForkJoinPool.commonPool()`来执行，虽然 `ForkJoinPool` 效率很高，但当同时提交大量任务时，可能会导致资源竞争和线程饥饿，进而影响系统性能。
 
@@ -2196,73 +2308,11 @@ CompletableFuture.runAsync(() -> {
 
 #### CallerRunsPolicy 拒绝策略有什么风险？如何解决？
 
-如果想要保证任何一个任务请求都要被执行的话，那选择 `CallerRunsPolicy` 拒绝策略更合适一些，但耗时的任务用了主线程执行，增加了时延，进而导致后续任务无法及时提交，严重的情况下很可能导致 OOM。
+CallerRunsPolicy的核心风险是会让提交任务的线程直接执行任务，这可能导致系统性能急剧下降甚至服务不可用。
 
-这里简单举一个例子，该线程池限定了最大线程数为 2，阻塞队列大小为 1(这意味着第 4 个任务就会走到拒绝策略)，`ThreadUtil`为 Hutool 提供的工具类：
+##### 主要风险
 
-```java
-public class ThreadPoolTest {
-
-    private static final Logger log = LoggerFactory.getLogger(ThreadPoolTest.class);
-
-    public static void main(String[] args) {
-        // 创建一个线程池，核心线程数为1，最大线程数为2
-        // 当线程数大于核心线程数时，多余的空闲线程存活的最长时间为60秒，
-        // 任务队列为容量为1的ArrayBlockingQueue，饱和策略为CallerRunsPolicy。
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1,
-                2,
-                60,
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(1),
-                new ThreadPoolExecutor.CallerRunsPolicy());
-
-        // 提交第一个任务，由核心线程执行
-        threadPoolExecutor.execute(() -> {
-            log.info("核心线程执行第一个任务");
-            ThreadUtil.sleep(1, TimeUnit.MINUTES);
-        });
-
-        // 提交第二个任务，由于核心线程被占用，任务将进入队列等待
-        threadPoolExecutor.execute(() -> {
-            log.info("非核心线程处理入队的第二个任务");
-            ThreadUtil.sleep(1, TimeUnit.MINUTES);
-        });
-
-        // 提交第三个任务，由于核心线程被占用且队列已满，创建非核心线程处理
-        threadPoolExecutor.execute(() -> {
-            log.info("非核心线程处理第三个任务");
-            ThreadUtil.sleep(1, TimeUnit.MINUTES);
-        });
-
-        // 提交第四个任务，由于核心线程和非核心线程都被占用，队列也满了，根据CallerRunsPolicy策略，任务将由提交任务的线程（即主线程）来执行
-        threadPoolExecutor.execute(() -> {
-            log.info("主线程处理第四个任务");
-            ThreadUtil.sleep(2, TimeUnit.MINUTES);
-        });
-
-        // 提交第五个任务，主线程被第四个任务卡住，该任务必须等到主线程执行完才能提交
-        threadPoolExecutor.execute(() -> {
-            log.info("核心线程执行第五个任务");
-        });
-
-        // 关闭线程池
-        threadPoolExecutor.shutdown();
-    }
-}
-```
-
-输出：
-
-```java
-18:19:48.203 INFO  [pool-1-thread-1] c.j.concurrent.ThreadPoolTest - 核心线程执行第一个任务
-18:19:48.203 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - 非核心线程处理第三个任务
-18:19:48.203 INFO  [main] c.j.concurrent.ThreadPoolTest - 主线程处理第四个任务
-18:20:48.212 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - 非核心线程处理入队的第二个任务
-18:21:48.219 INFO  [pool-1-thread-2] c.j.concurrent.ThreadPoolTest - 核心线程执行第五个任务
-```
-
-从输出结果可以看出，因为`CallerRunsPolicy`这个拒绝策略，增加了时延，进而导致后续任务无法及时提交，严重的情况下很可能导致 OOM。
-
+CallerRunsPolicy在线程池满了之后，会让调用者线程（比如Tomcat的HTTP请求处理线程固定是200个大小的线程池）自己去执行被拒绝的任务。如果任务执行时间很长，调用者线程就会被长时间占用，无法处理其他请求。在Web应用中，这意味着Tomcat的工作线程会被占用去执行业务任务，导致无法接收新的HTTP请求，最终造成服务假死。
 
 
 ##### 1. 通过合理设置参数的方式

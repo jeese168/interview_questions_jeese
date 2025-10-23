@@ -52,7 +52,7 @@ public void updateData() {
 
 
 
-#### Spring IoC和AOP 介绍一下
+#### Spring IoC和AOP 介绍一下*
 
 ##### 1. IoC
 
@@ -146,7 +146,7 @@ Spring IoC（控制反转）是通过**容器管理对象**及其**依赖关系*
 - **反射**：Spring IOC容器利用Java的反射机制，运行时动态创建对象实例，并调用对象的方法。反射使Spring能够在不直接使用`new`关键字的情况下实例化类并设置属性，从而**解耦对象的创建和管理**。
 - **依赖注入**：IOC的**核心概念是依赖注入**，即容器负责管理应用程序组件之间的依赖关系。Spring通过构造函数注入、属性注入或方法注入，将组件之间的依赖关系描述在配置文件中或使用注解。
 - **设计模式 - 工厂模式**：Spring IoC容器本质上是一个工厂，负责创建和管理Bean，默认情况下，Spring IoC管理的Bean是**单例的**，即同一个Bean在整个容器中只会创建**一个实例**，然后在全局中使用这个实例。
-- **容器实现**：Spring IOC容器是实现IOC的核心，通常使用BeanFactory或ApplicationContext来管理Bean。**BeanFactory是IOC容器的基本形式，提供基本的IOC功能（如依赖注入功能，延迟加载Bean）。**ApplicationContext是BeanFactory的扩展，并提供更多企业级功能（**事件发布、国际化、AOP支持**等，通常用扩展容器）。
+- **容器实现**：Spring IOC容器是实现IOC的核心，通常使用BeanFactory或ApplicationContext来管理Bean。**BeanFactory是IOC容器的基本形式，提供基本的IOC功能（如依赖注入功能，延迟加载Bean）。** ApplicationContext是BeanFactory的扩展，并提供更多企业级功能（**事件发布、国际化、AOP支持**等，通常用扩展容器）。
 
 
 
@@ -199,7 +199,7 @@ Spring AOP支持两种动态代理：
 
 #### 依赖倒置，依赖注入，控制反转分别是什么？
 
-控制反转中的**“控制”**指的是**开发者对程序执行流程的控制**，而**“反转”**指的是在没有使用框架之前，开发者自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。**流程的控制权从开发者“反转”给了框架。**
+控制反转中的**“控制”** 指的是**开发者对程序执行流程的控制**，而 **“反转”** 指的是在没有使用框架之前，开发者自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。**流程的控制权从开发者“反转”给了框架。**
 
 依赖注入是一种具体的编码技巧。我们不通过 new 的方式在类内部创建依赖类的对象，而是将依赖的类对象在外部创建好之后，通过构造函数、函数参数等方式传递（或注入）给类来使用，依赖注入是 Spring实现控制反转的具体实现方式。
 
@@ -349,101 +349,190 @@ A：JDK动态代理生成的代理类继承`Proxy`类，因此目标类**必须�
 
 **Q：举一个代理模式的例子？**
 
-A：设**场景**为记录用户服务方法耗时。
+A：**静态代理**
 
-静态代理定义接口
+**场景**：删除用户前需要检查权限
 
 ```java
+// 定义接口
 public interface UserService {
-    void addUser(String name);
+    void deleteUser(Long id);
 }
-```
 
-静态代理实现类（委托类）
-
-```java
+// 真实业务类
 public class UserServiceImpl implements UserService {
-    @Override
-    public void addUser(String name) {
-        System.out.println("添加用户: " + name);
+    public void deleteUser(Long id) {
+        System.out.println("删除用户：" + id);
     }
 }
-```
 
-静态代理类需手动编写代理，需实现相同接口：
-
-```java
-public class UserServiceStaticProxy implements UserService {
-    private final UserService target;  // 委托对象
-
-    public UserServiceStaticProxy(UserService target) {
+// 手写代理类
+public class UserServiceProxy implements UserService {
+    private UserService target;
+    
+    public UserServiceProxy(UserService target) {
         this.target = target;
     }
-
-    @Override
-    public void addUser(String name) {
-        long start = System.currentTimeMillis();
-        target.addUser(name);  // 调用委托类方法
-        long end = System.currentTimeMillis();
-        System.out.println("方法耗时: " + (end - start) + "ms");
+    
+    public void deleteUser(Long id) {
+        System.out.println("检查权限...");
+        if (!checkPermission()) {
+            throw new RuntimeException("无权限");
+        }
+        
+        target.deleteUser(id);  // 调用真实方法
+        
+        System.out.println("记录日志...");
+    }
+    
+    private boolean checkPermission() {
+        return true;
     }
 }
+
+// 使用
+UserService realService = new UserServiceImpl();
+UserService proxy = new UserServiceProxy(realService);
+proxy.deleteUser(123L);
 ```
 
-最后，使用静态代理
+**执行流程**：
+
+```
+调用 proxy.deleteUser(123L)
+  ↓
+检查权限...
+  ↓
+删除用户：123  ← 真实方法
+  ↓
+记录日志...
+```
+
+**缺点**：如果有100个业务类都需要权限检查，就要手写100个代理类，代码重复严重。
+
+
+
+**Spring AOP动态代理**
+
+**相同场景，用Spring AOP实现**
 
 ```java
-public class Main {
-    public static void main(String[] args) {
-        UserService target = new UserServiceImpl();
-        UserService proxy = new UserServiceStaticProxy(target);
-        proxy.addUser("张三");  // 输出：添加用户: 张三 → 方法耗时: 1ms
+// 1. 定义权限注解
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequirePermission {
+    String value();
+}
+
+// 2. 业务类（只需加注解）
+@Service
+public class UserService {
+    
+    @RequirePermission("user:delete")
+    public void deleteUser(Long id) {
+        System.out.println("删除用户：" + id);
     }
 }
-```
 
----
-
-动态代理示例（基于JDK），首先实现InvocationHandler
-
-```java
-public class LogInvocationHandler implements InvocationHandler {
-    private final Object target;  // 可代理任意对象
-
-    public LogInvocationHandler(Object target) {
-        this.target = target;
-    }
-
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        long start = System.currentTimeMillis();
-        Object result = method.invoke(target, args);  // 反射调用目标方法
-        long end = System.currentTimeMillis();
-        System.out.println("方法耗时: " + (end - start) + "ms");
+// 3. 定义切面（统一处理所有权限检查）
+@Aspect
+@Component
+public class PermissionAspect {
+    
+    @Around("@annotation(requirePermission)")
+    public Object checkPermission(ProceedingJoinPoint pjp, 
+                                 RequirePermission requirePermission) throws Throwable {
+        String perm = requirePermission.value();
+        
+        System.out.println("检查权限：" + perm);
+        if (!checkPermission(perm)) {
+            throw new RuntimeException("无权限");
+        }
+        
+        Object result = pjp.proceed();  // 调用真实方法
+        
+        System.out.println("记录日志");
         return result;
     }
+    
+    private boolean checkPermission(String perm) {
+        return true;
+    }
 }
-```
 
-接着使用动态代理
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        UserService target = new UserServiceImpl();
-        // 动态生成代理对象
-        UserService proxy = (UserService) Proxy.newProxyInstance(
-            target.getClass().getClassLoader(),
-            target.getClass().getInterfaces(),
-            new LogInvocationHandler(target)
-        );
-        proxy.addUser("李四");  // 输出：添加用户: 李四 → 方法耗时: 0ms
+// 4. 使用（Spring自动注入代理对象）
+@RestController
+public class UserController {
+    
+    @Autowired
+    private UserService userService;  // 注入的是代理对象
+    
+    @DeleteMapping("/user/{id}")
+    public Result delete(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return Result.success();
     }
 }
 ```
 
-直观而言**静态代理**属于简单直接，但代码冗余，适合代理固定类。**动态代理**则灵活高效，适合代理多个类或需要统一处理的场景（如日志、事务）。  动态代理通过**运行时生成代理类** + **反射/字节码增强**，实现了对原有逻辑的无侵入扩展。
+**执行流程**：
 
+```
+调用 userService.deleteUser(123L)
+  ↓
+Spring拦截（因为方法上有 @RequirePermission 注解）
+  ↓
+执行 PermissionAspect.checkPermission()
+  ↓
+检查权限：user:delete
+  ↓
+pjp.proceed()  ← 通过反射调用真实方法
+  ↓
+删除用户：123
+  ↓
+记录日志
+```
+
+**Spring底层做了什么**：
+
+Spring启动时扫描到UserService的deleteUser方法有`@RequirePermission`注解，就会创建一个代理对象。这个代理对象的deleteUser方法被重写了，大概是这样：
+
+```java
+// Spring生成的代理类（简化版）
+public class UserService$$Proxy extends UserService {
+    
+    private PermissionAspect aspect;
+    private UserService target;  // 真实对象
+    
+    public void deleteUser(Long id) {
+        // 调用切面的 checkPermission 方法
+        // 切面方法里会调用 pjp.proceed()
+        // pjp.proceed() 内部通过反射调用 target.deleteUser(id)
+        aspect.checkPermission(...);
+    }
+}
+```
+
+当你`@Autowired`注入UserService时，**Spring注入的是这个代理对象，不是真实的UserServiceImpl对象**。
+
+**关键点**：
+
+1. **注解只是标记**：`@RequirePermission`本身不执行任何逻辑，它只是告诉Spring"这个方法需要权限检查"
+    
+2. **切点表达式匹配方法**：`@Around("@annotation(requirePermission)")`的意思是"拦截所有带@RequirePermission注解的方法"
+    
+3. **真实方法的调用**：`pjp.proceed()`这行代码通过反射调用真实方法，它等价于`method.invoke(target, args)`
+    
+4. **@Autowired注入的是代理**：你以为注入的是UserService，实际上是Spring生成的代理对象
+    
+
+**对比总结**：
+
+静态代理：编译时手写代理类，一个业务类对应一个代理类，代码重复
+
+Spring AOP：运行时动态生成代理类，一个切面可以处理所有带注解的方法，代码简洁
+
+本质都是：**代理对象拦截方法调用 → 执行横切逻辑 → 调用真实方法 → 执行后置逻辑**
 
 
 #### AOP实现有哪些注解？
@@ -1108,7 +1197,9 @@ public MyBeanClass myBean() {
 }
 ```
 
-
+关于Application和Singleton两者的区别如下所示：
+- **Application绑定ServletContext**（整个Web应用），**Singleton绑定ApplicationContext**（一个Spring容器）。
+- 在大多数情况下（只有一个Spring容器），两者范围相同。但如果有多个Spring容器，**Application的范围更大**。
 
 #### Spring容器里存的是什么？
 
@@ -1230,7 +1321,7 @@ public class AppConfig {
 
 - **注册 Bean 定义**：将解析后的 `BeanDefinition` 注册到 `BeanDefinitionRegistry`（如 `DefaultListableBeanFactory`）。包括 Bean 的类、作用域、依赖关系、初始化和销毁方法等。
 
-- **实例化和依赖注入：**当应用程序请求某个 Bean 时，容器实例化该 Bean ，随后根据 `BeanDefinition` 中的配置，通过反射调用 setter 方法或构造函数注入依赖（依赖的 Bean（如 `userDao`）通过 `ref` 直接指定）。
+- **实例化和依赖注入：** 当应用程序请求某个 Bean 时，容器实例化该 Bean ，随后根据 `BeanDefinition` 中的配置，通过反射调用 setter 方法或构造函数注入依赖（依赖的 Bean（如 `userDao`）通过 `ref` 直接指定）。
 
 
 
@@ -1257,7 +1348,7 @@ public class AppConfig {
 尽管使用的方式不同，但 XML 注入和注解注入在底层的实现机制是相似的，主要体现在以下几个方面：
 
 1. **BeanDefinition**：无论是 XML 还是注解，最终都会生成 `BeanDefinition` 对象，并都注册在 `BeanDefinitionRegistry` 中。
-2. **后处理器：**依赖注入最终通过 `BeanPostProcessor` 实现，细节方面有略微差异（不能认为XML和注解的后处理器不同，后处理器一般都是全局的）
+2. **后处理器：** 依赖注入最终通过 `BeanPostProcessor` 实现，细节方面有略微差异（不能认为XML和注解的后处理器不同，后处理器一般都是全局的）
    - 注解是依赖关系通过 `@Autowired` 等注解隐式定义。由 `AutowiredAnnotationBeanPostProcessor` 解析注解并注入依赖。
    - 对于 XML，依赖关系在 `BeanDefinition` 中显式记录（如 `PropertyValue`）。最终由 `InstantiationAwareBeanPostProcessor` 处理属性赋值。
 3. **依赖查找**：在依赖注入时，Spring 容器会通过 `ApplicationContext` 中的 BeanFactory 方法来查找和注入依赖，无论是通过 XML 还是注解，都会调用类似的查找方法。
@@ -1566,7 +1657,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.example.Permi
 
 #### 了解SpringMVC的处理流程吗？
 
-一段话回答就是，Spring MVC的核心流程围绕**前端控制器`DispatcherServlet`**展开。当请求到达时，`DispatcherServlet`首先通过`HandlerMapping`找到匹配的处理器和拦截器链，然后通过`HandlerAdapter`执行具体的Controller方法，处理过程中会完成参数绑定、数据验证等操作。方法执行后，若返回视图信息，会由`ViewResolver`解析为具体视图并渲染；若返回数据（如REST接口），则直接通过消息转换器生成响应。整个过程还通过拦截器实现横切逻辑（如权限校验），并通过异常处理器统一管理错误。
+一段话回答就是，Spring MVC的核心流程围绕**前端控制器`DispatcherServlet`** 展开。当请求到达时，`DispatcherServlet`首先通过`HandlerMapping`找到匹配的处理器和拦截器链，然后通过`HandlerAdapter`执行具体的Controller方法，处理过程中会完成参数绑定、数据验证等操作。方法执行后，若返回视图信息，会由`ViewResolver`解析为具体视图并渲染；若返回数据（如REST接口），则直接通过消息转换器生成响应。整个过程还通过拦截器实现横切逻辑（如权限校验），并通过异常处理器统一管理错误。
 
 ![img](文档图片/1716791047520-ac0d9673-be0a-4005-8732-30bdedc8f1af.webp)
 
@@ -1575,14 +1666,14 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.example.Permi
 1. **用户发起请求**
    请求首先到达**前端控制器DispatcherServlet**，它是整个流程的调度中心。
 2. **映射处理器（HandlerMapping）**
-   `DispatcherServlet`通过**`HandlerMapping`**根据请求URL找到匹配的**处理器（Handler）**及其关联的**拦截器（Interceptor）**，返回一个`HandlerExecutionChain`（处理器执行链）。
+   `DispatcherServlet`通过 **`HandlerMapping`** 根据请求URL找到匹配的**处理器（Handler）**及其关联的**拦截器（Interceptor）**，返回一个`HandlerExecutionChain`（处理器执行链）。
 3. **适配器调用（HandlerAdapter）**
-   `DispatcherServlet`通过**`HandlerAdapter`**执行处理器（如`@Controller`中的方法）。
+   `DispatcherServlet`通过 **`HandlerAdapter`** 执行处理器（如`@Controller`中的方法）。
    **核心操作**：参数解析（如`@RequestParam`）、数据绑定（如`@ModelAttribute`）、数据验证（如`@Valid`）、消息转换（如JSON到对象）等。
 4. **处理器执行（Controller方法）**
-   业务逻辑处理完成后，返回**`ModelAndView`**（在**RESTful场景**中直接返回数据，如`@ResponseBody`标注的方法）。
+   业务逻辑处理完成后，返回 **`ModelAndView`** （在**RESTful场景**中直接返回数据，如`@ResponseBody`标注的方法）。
 5. **视图解析（ViewResolver）**
-   若返回`ModelAndView`，`DispatcherServlet`调用**`ViewResolver`**将逻辑视图名（如"home"）解析为具体的**`View`对象**（如JSP、Thymeleaf模板）。
+   若返回`ModelAndView`，`DispatcherServlet`调用 **`ViewResolver`** 将逻辑视图名（如"home"）解析为具体的**`View`对象**（如JSP、Thymeleaf模板）。
 6. **视图渲染**
    `DispatcherServlet`将`Model`中的数据填充到`View`中，生成最终响应内容（HTML/JSON等），返回给客户端。
 
@@ -1590,9 +1681,9 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.example.Permi
 
 **Q：解释一下拦截器（Interceptor）和RESTful场景？**
 
-A：**拦截器（Interceptor）**拦截器本质上是**AOP（面向切面编程）**的一种实现方式，允许在请求生命周期的不同阶段执行额外逻辑。其在`HandlerExecutionChain`中，拦截器的`preHandle()`在Controller方法前执行，`postHandle()`在方法后、视图渲染前执行，`afterCompletion()`在请求完成后执行。
+A：**拦截器（Interceptor）** 拦截器本质上是**AOP（面向切面编程）** 的一种实现方式，允许在请求生命周期的不同阶段执行额外逻辑。其在`HandlerExecutionChain`中，拦截器的`preHandle()`在Controller方法前执行，`postHandle()`在方法后、视图渲染前执行，`afterCompletion()`在请求完成后执行。
 
-**拦截器（Interceptor）**与**Filter（过滤器）**存在区别：
+**拦截器（Interceptor）** 与**Filter（过滤器）** 存在区别：
 
 - **拦截器依赖于 Spring MVC**，作用于**Controller 层**，可获取方法参数、返回值等。
 - **过滤器属于 Servlet 规范**，在**请求进入 Spring MVC 之前**执行，一般用于全局请求处理，如编码转换、CORS 处理等。
@@ -1730,15 +1821,15 @@ Spring Boot是基于Spring且是Spring的扩展，传统的Spring更适合需要
    - 提供**健康检查、指标监控、日志管理**等端点（如`/actuator/health`），方便运维。
    - 集成Prometheus、Grafana等监控工具时，配置大幅简化。
 
-| **对比维度**     | **传统Spring**                           | **Spring Boot**                                |
-| ---------------- | ---------------------------------------- | ---------------------------------------------- |
-| **配置方式**     | 需手动配置XML、Java Config，繁琐易出错。 | 自动配置（Auto-Configuration），按需覆盖配置。 |
-| **依赖管理**     | 需手动管理依赖版本，易出现冲突。         | Starter依赖统一管理版本，避免冲突。            |
-| **项目启动速度** | 需配置Servlet容器、部署WAR，启动较慢。   | 内嵌服务器，直接运行JAR，秒级启动。            |
-| **微服务支持**   | 需额外整合Spring Cloud组件。             | 天然支持微服务，与Spring Cloud无缝集成。       |
-| **开发效率**     | 适合需要深度定制化的大型企业级应用。     | 适合快速迭代、中小型项目或微服务架构。         |
+| **对比维度**   | **传统Spring**                | **Spring Boot**                  |
+| ---------- | --------------------------- | -------------------------------- |
+| **配置方式**   | 需手动配置XML、Java Config，繁琐易出错。 | 自动配置（Auto-Configuration），按需覆盖配置。 |
+| **依赖管理**   | 需手动管理依赖版本，易出现冲突。            | Starter依赖统一管理版本，避免冲突。            |
+| **项目启动速度** | 需配置Servlet容器、部署WAR，启动较慢。    | 内嵌服务器，直接运行JAR，秒级启动。              |
+| **微服务支持**  | 需额外整合Spring Cloud组件。        | 天然支持微服务，与Spring Cloud无缝集成。       |
+| **开发效率**   | 适合需要深度定制化的大型企业级应用。          | 适合快速迭代、中小型项目或微服务架构。              |
 
-```
+
 
 #### SpringBoot用到哪些设计模式？
 
