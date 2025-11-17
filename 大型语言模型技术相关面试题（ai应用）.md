@@ -3,8 +3,13 @@
 - [ ] 大型语言模型基础算法
 - [ ] AI Agent 技术&协议
 - [ ] 内容增强检索（RAG）
-- [ ] 提示词工程
+- [x] 提示词工程
 - [x] 上下文工程
+
+>AI对话：[计划](https://claude.ai/chat/39642060-6db6-4e71-8e1f-3ff70267f220)和[评价](https://claude.ai/chat/e61f2c6a-9ab9-4066-a861-9e8c1a5b42c3)
+>杂货对话：[ChatGpt](https://chatgpt.com/c/6908960a-5ca4-832c-a487-3749de23fb90)
+
+
 
 ### 大型语言模型基础算法
 
@@ -12,6 +17,7 @@
 > **Scaling Laws**（模型规模与性能的关系）
    **Tokenization**（分词对模型性能的影响）
    **Prompt 在模型内部的处理流程**（从输入到输出）
+> **微调还是少量指令，微调加上rag**
 
 #### 大模型的定义与架构有了解吗？
 
@@ -562,6 +568,7 @@ RAG 通过引入外部知识源来弥补这些不足。所有 RAG 系统都包�
 
 > 看要不要再补充一下。
 > Prompt 版本管理和 A/B 测试的实践
+> AI对话：[kimi](https://www.kimi.com/chat/19a78818-1442-88ec-8000-095e4faeec6d)和[gemini](https://aistudio.google.com/prompts/1lcolOdU2qlZaMovw8IkHlCPIlG57lLEO)
 
 #### 提示词工程（Prompt Engineering）是什么？
 在早期使用 LLMs 进行工程开发时，大多数用例都需要针对一次性分类或文本生成任务，**提示工程关注点如何编写有效的提示**，在一定程度上为AI 工程提升了不错的效果。
@@ -666,7 +673,7 @@ print(response_1)
 ```
 
 
-例2：返例
+例2：反例
 ```python
 text_2 = f"""
 阳光明媚，鸟儿在歌唱。今天是个去公园散步的好日子。花儿在盛开，树木在微风中轻轻摇曳。
