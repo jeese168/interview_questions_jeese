@@ -18,27 +18,29 @@
 
 ### 💾 数据库与缓存
 - **MySQL面试题** - 索引、事务、锁、优化
+	- **深化中：** 分布式数据库 (NewSQL)
 - **Redis面试题** - 数据结构、持久化、集群、缓存策略
 
 ### 🌐 计算机基础（更新中）
 - **操作系统面试题** - 进程/线程、IO模型、内存管理、文件系统
-  - 🔥 **重点**：持续深化中：IO相关内容（select/poll/epoll、BIO/NIO/AIO）
-  - 后端开发的基本功，深入理解对性能优化至关重要
+	- 🔥 **重点**：持续深化中：IO相关内容（select/poll/epoll、BIO/NIO/AIO）
 - **计算机网络面试题** - TCP/IP、HTTP/HTTPS、网络编程
 
 ### 🏗️ 架构与设计
 - **微服务体系和分布式面试题** - 分布式系统、高并发、高可用
-- **场景和系统设计面试题** - 一些常见场景
-- **Spring面试题** - IoC、AOP、SpringBoot、SpringCloud
+	- **深化中：** 分布式事务、云原生（Docker+k8s）、全链路监控（ELK+SkyWalking）、RPC远程过程调用（待补充）
+- **场景和系统设计面试题** - **待重构**
+- **Spring面试题** - IoC、AOP、SpringBoot
 
 ### 🤖 新兴技术
 - **大型语言模型技术深度解析** - 大型语言模型基础算法、AI Agent 技术&协议、内容增强检索（RAG）、提示词工程和上下文工程
+	- 提示词工程辅助理解项目：https://github.com/jeese168/PromptEngineeringJupyterTest
 
 更新进度：
 - [ ] 大型语言模型基础算法
 - [ ] AI Agent 技术&协议
 - [ ] 内容增强检索（RAG）
-- [ ] 提示词工程
+- [x] 提示词工程
 - [x] 上下文工程
 
 
