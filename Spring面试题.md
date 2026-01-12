@@ -2,7 +2,7 @@
 
 ### Spring
 
-#### 说一下你对 Spring 的理解？
+#### 说一下你对 Spring 的理解？*
 
 ![img](文档图片/1712650311366-b499469c-5afd-4be9-bad3-d787de86bf98.png)
 
@@ -52,41 +52,6 @@ public void updateData() {
 
 
 
-#### Spring IoC和AOP 介绍一下*
-
-##### 1. IoC
-
-IoC容器翻译过来就是控制反转容器。控制反转是一种创建和获取对象的技术思想，不通过像传统开发中使用new关键字创建对象，而是通过IoC容器来帮我们实例化对象，这种方式可以大大降低对象之间的耦合度。
-
-基于此之外，Spring IoC还提供了Bean的生命周期管理。
-
-依赖注入(DI)是实现这种IoC容器的一种方式，通过依赖注入，实现了多种注入方式构造器注入、setter注入、字段注入等。
-
-同时Spring IoC提供了两种容器类型，BeanFactory(基础容器)和ApplicationContext(扩展容器)。
-
-
-
-##### 2. AOP
-
-AOP是面向切面编程，AOP开发者专注于核心业务逻辑开发，而Spring AOP将那些与业务无关，却为业务模块所共同调用的逻辑封装起来，以减少重复代码和降低耦合度。
-
-Spring AOP 就是基于动态代理的有两种动态代理方式JDK动态代理和CGLIB动态代理
-
-- 默认使用JDK动态代理，一般就是对接口进行代理。
-
-- 当目标类没有实现接口时，Spring会使用进行代理
-
-AOP主要用于自动实现日志记录、性能统计、安全控制、事务处理、异常处理等横切，由开发者通过XML文件或者注解来复用即可。
-
-
-
-在 Spring 框架中，IOC 和 AOP 结合使用，可以更好地实现代码的模块化和分层管理。例如：
-
-- 通过 IOC 容器管理对象的依赖关系，然后通过 AOP 将横切关注点统一切入到需要的业务逻辑中。
-- 使用 IOC 容器管理 Service 层和 DAO 层的依赖关系，然后通过 AOP 在 Service 层实现事务管理、日志记录等横切功能，使得业务逻辑更加清晰和可维护。
-
-
-
 **Q：讲讲MVC分层？**
 
 A：自底向上，一共4层。
@@ -99,65 +64,9 @@ A：自底向上，一共4层。
 
 - **视图层**即View层主要和控制层紧密结合，主要负责前台jsp页面的表示。
 
+其中持久层和业务层合起来就是模型层，只不过是因为单一职责原则进一步拆分，**映射关系：Service + DAO = Model** 。
 
-
-#### Spring的aop展开介绍一下
-
-Java 是一门面向对象编程的语言，在面向对象编程 OOP 中最小的单元就是 Class 对象，关注的是对象之间的关系和交互。但是在面向切面编程 AOP 中最小的单元是 **切面**，关注的是**在多个对象之间共同复用的功能**（横切关注点）。
-
-而Spring AOP是Spring框架中用于实现面向切面编程的重要模块。在Spring AOP面向切面编程的思想里面，把功能分为核心业务和周边功能两种。
-
-- **核心业务**：登陆、注册、增、删、改、查、都叫核心业务
-- **周边功能**：日志、事务管理这些次要的为周边业务
-
-**在面向切面编程中，核心业务功能和周边功能是分别独立进行开发，两者不是耦合的，然后把切面功能和核心业务功能 "编织" 在一起。**
-
-所以有了Spring AOP，开发者专注于核心业务逻辑开发，**将事务管理、安全控制等周边业务逻辑模块化而开发者需要时复用即可**，提高代码的可维护性和可重用性。
-
-Spring AOP 是基于代理模式实现，有两种动态代理方式JDK动态代理和CGLIB动态代理。
-
-- 默认使用JDK动态代理，一般就是对接口进行代理。
-
-- 当目标类没有实现接口时，Spring会使用进行代理
-
-AOP主要用于自动实现日志记录、性能统计、安全控制、事务处理、异常处理等横切，由开发者通过XML文件或者注解来复用即可。
-
-
-
-在 AOP 中有以下几个概念：
-
-- **AspectJ**：切面，只是一个概念，没有具体的接口或类与之对应，是 Join point，Advice 和 Pointcut 的一个统称。
-- **Join point**：连接点，指程序执行过程中的一个点，例如方法调用、异常处理等。在 Spring AOP 中，仅支持方法级别的连接点。
-- **Advice**：通知，即我们定义的一个切面中的横切逻辑，有“around”，“before”和“after”三种类型。在很多的 AOP 实现框架中，Advice 通常作为一个拦截器，也可以包含许多个拦截器作为一条链路围绕着 Join point 进行处理。
-- **Pointcut**：切点，用于匹配连接点，一个 AspectJ 中包含哪些 Join point 需要由 Pointcut 进行筛选。
-- **Introduction**：引介，让一个切面可以声明被通知的对象实现任何他们没有真正实现的额外的接口。例如可以让一个代理对象代理两个目标类。
-- **Weaving**：织入，在有了连接点、切点、通知以及切面，如何将它们应用到程序中呢？没错，就是织入，在切点的引导下，将通知逻辑插入到目标方法上，使得我们的通知逻辑在方法调用时得以执行。
-- **AOP proxy**：AOP 代理，指在 AOP 实现框架中实现切面协议的对象。在 Spring AOP 中有两种代理，分别是 JDK 动态代理和 CGLIB 动态代理。
-- **Target object**：目标对象，就是被代理的对象。
-
-
-
-#### IOC和AOP是通过什么机制来实现的?
-
-##### 1. Spring IOC 实现机制
-
-Spring IoC（控制反转）是通过**容器管理对象**及其**依赖关系**来实现的，主要依赖以下技术和机制：
-
-- **反射**：Spring IOC容器利用Java的反射机制，运行时动态创建对象实例，并调用对象的方法。反射使Spring能够在不直接使用`new`关键字的情况下实例化类并设置属性，从而**解耦对象的创建和管理**。
-- **依赖注入**：IOC的**核心概念是依赖注入**，即容器负责管理应用程序组件之间的依赖关系。Spring通过构造函数注入、属性注入或方法注入，将组件之间的依赖关系描述在配置文件中或使用注解。
-- **设计模式 - 工厂模式**：Spring IoC容器本质上是一个工厂，负责创建和管理Bean，默认情况下，Spring IoC管理的Bean是**单例的**，即同一个Bean在整个容器中只会创建**一个实例**，然后在全局中使用这个实例。
-- **容器实现**：Spring IOC容器是实现IOC的核心，通常使用BeanFactory或ApplicationContext来管理Bean。**BeanFactory是IOC容器的基本形式，提供基本的IOC功能（如依赖注入功能，延迟加载Bean）。** ApplicationContext是BeanFactory的扩展，并提供更多企业级功能（**事件发布、国际化、AOP支持**等，通常用扩展容器）。
-
-
-
-##### 2. Spring AOP 实现机制
-
-Spring AOP的**核心思想**是通过**动态代理**，在**运行时**为目标对象**添加额外的行为（如事务管理、日志记录）**，而无需修改原始代码。设计模式是代理模式，所以AOP增强Bean的情况下，Spring IOC会使用**代理模式**来管理对象的访问。
-
-Spring AOP支持两种动态代理：
-
-- **基于JDK的动态代理**：使用java.lang.reflect.Proxy类和java.lang.reflect.InvocationHandler接口实现。这种方式需要代理的类实现一个或多个接口。
-- **基于CGLIB的动态代理**：当被代理的类没有实现接口时，Spring会使用CGLIB库生成一个被代理类的子类作为代理。CGLIB（Code Generation Library）是一个第三方代码生成库，通过继承方式实现代理。
+**现代前后端分离 (RESTful)架构，View 层其实弱化了**。在现在的微服务架构中，Controller 通常标有 `@RestController`，返回的是 **JSON 数据**（Domain/DTO），而不是视图页面。前端（React/Vue）拿 JSON 去解析填入对应的值即可。
 
 
 
@@ -199,7 +108,7 @@ Spring AOP支持两种动态代理：
 
 #### 依赖倒置，依赖注入，控制反转分别是什么？
 
-控制反转中的**“控制”** 指的是**开发者对程序执行流程的控制**，而 **“反转”** 指的是在没有使用框架之前，开发者自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。**流程的控制权从开发者“反转”给了框架。**
+控制反转中的 **“控制”** 指的是**开发者对程序执行流程的控制**，而 **“反转”** 指的是在没有使用框架之前，开发者自己控制整个程序的执行。在使用框架之后，整个程序的执行流程通过框架来控制。**流程的控制权从开发者“反转”给了框架。**
 
 依赖注入是一种具体的编码技巧。我们不通过 new 的方式在类内部创建依赖类的对象，而是将依赖的类对象在外部创建好之后，通过构造函数、函数参数等方式传递（或注入）给类来使用，依赖注入是 Spring实现控制反转的具体实现方式。
 
@@ -217,32 +126,108 @@ Spring IoC的核心是将对象的创建和依赖关系的管理从开发者手�
 
 Spring IoC 的实现基于工厂模式和依赖注入模式。Spring 容器本质上是一个高级的工厂（`BeanFactory`），它负责根据配置（XML、注解或 Java 配置类）创建和管理 Bean 的实例。依赖注入（Dependency Injection, DI）是 IoC 的具体实现方式，Spring 通过构造函数注入、Setter 注入或字段注入的方式，将依赖对象动态注入到目标对象中。具体来说可以在以下几个方面进行：
 
-* Bean 的定义与注册：要支持多种配置方式（XML、注解、Java 配置类）。使用 `BeanDefinition` 存储 Bean 的元数据（如类名、作用域、依赖关系等）。
+##### 1. 配置解析层 (Configuration Layer)
+我会设计一个 **`BeanDefinitionReader`** 接口，负责把不同格式的配置（XML/注解）统一解析成标准化的 **`BeanDefinition`（类的蓝图）**。
+* *亮点*：这样无论配置形式怎么变，内核都不用改（解耦）。
 
-- Bean的生命周期管理：需要设计Bean的创建、初始化、销毁等生命周期管理机制，可以考虑使用工厂模式和单例模式来实现。
-- Bean的作用域：需要支持多种Bean作用域，比如单例、原型、会话、请求等，可以考虑使用Map来存储不同作用域的Bean实例。
-- Bean 的实例化和依赖注入：需要实现依赖注入的功能，包括属性注入、构造函数注入、方法注入等。可以考虑使用反射机制和XML配置文件来实现Bean 的实例化和依赖注入。也要考虑到处理循环依赖问题，可以使用三级缓存（提前暴露半成品对象）。
-- AOP功能的支持：需要支持AOP功能，可以考虑使用动态代理机制和切面编程来实现。
-- 异常处理：需要考虑异常处理机制，包括Bean创建异常、依赖注入异常等，可以考虑使用try-catch机制来处理异常。
-- 配置文件加载：需要支持从不同的配置文件中加载Bean的相关信息，可以考虑使用XML、注解或者Java配置类来实现。
+##### 2. 核心容器层 (Core Container Layer)
+
+在这一层使用注册表和单例池来存储类和对象
+**注册表 (Registry)**：用一个 `ConcurrentHashMap<String, BeanDefinition>` 来存储类的定义。
+**单例池 (Singleton Pool)**：用一个 `ConcurrentHashMap` 来做一级缓存，存储单例对象。
 
 
 
-#### SpringAOP主要想解决什么问题？
+##### 3. 对象生产与注入层 (The Factory & DI)
 
-**AOP 的核心目标是解决横切关注点（Cross-Cutting Concerns）的问题**。横切关注点是指那些分散在多个模块中、与核心业务逻辑无关但必须存在的功能（如日志、事务、权限校验）。这些功能如果直接嵌入在业务代码中，会导致代码重复、耦合度高、难以维护。**AOP 通过将这些横切关注点模块化，并将其与核心业务逻辑分离，从而实现代码的复用和解耦。**
+* 利用**反射**实例化对象。
+* 利用**递归**或**三级缓存**解决依赖注入和循环依赖问题。
+* **错误处理**：抛出 `NoSuchBeanDefinitionException` 或 `BeanCreationException`。
+
+##### 4. 扩展增强层 (Extension Layer) 
+
+我会设计 **`BeanPostProcessor` (后置处理器)** 接口。
+* *作用*：允许用户在 Bean 初始化前后插入自定义逻辑。
+* *价值*：**AOP 就是基于这个扩展点实现的！**（在 PostProcessor 里生成代理对象替换原始对象）。没有这个扩展点，容器就是死的。
+
+
+
+
+#### IOC是通过什么机制来实现的?
+
+Spring IoC（控制反转）是通过**容器管理对象**及其**依赖关系**来实现的，主要依赖以下技术和机制：
+
+- **反射**：Spring IOC容器利用Java的反射机制，运行时动态创建对象实例，并调用对象的方法。反射使Spring能够在不直接使用`new`关键字的情况下实例化类并设置属性，从而**解耦对象的创建和管理**。
+- **依赖注入**：IOC的**核心概念是依赖注入**，即容器负责管理应用程序组件之间的依赖关系。Spring通过构造函数注入、属性注入或方法注入，将组件之间的依赖关系描述在配置文件中或使用注解。
+- **设计模式 - 工厂模式**：Spring IoC容器本质上是一个工厂，负责创建和管理Bean，默认情况下，Spring IoC管理的Bean是**单例的**，即同一个Bean在整个容器中只会创建**一个实例**，然后在全局中使用这个实例。
+- **容器实现**：Spring IOC容器是实现IOC的核心，通常使用BeanFactory或ApplicationContext来管理Bean。**BeanFactory是IOC容器的基本形式，提供基本的IOC功能（如依赖注入功能，延迟加载Bean）。** ApplicationContext是BeanFactory的扩展，并提供更多企业级功能（**事件发布、国际化、AOP支持**等，通常用扩展容器）。
+
+
+
+
+
+
+#### Spring的aop展开介绍一下？
+
+Java 是一门面向对象编程的语言，在面向对象编程 OOP 中最小的单元就是 Class 对象，关注的是对象之间的关系和交互。但是在面向切面编程 AOP 中最小的单元是 **切面**，关注的是**在多个对象之间共同复用的功能**（横切关注点）。
+
+而Spring AOP是Spring框架中用于实现面向切面编程的重要模块。在Spring AOP面向切面编程的思想里面，把功能分为核心业务和周边功能两种。
 
 - **核心业务**：登陆、注册、增、删、改、查、都叫核心业务
 - **周边功能**：日志、事务管理这些次要的为周边业务
+
+**在面向切面编程中，核心业务功能和周边功能是分别独立进行开发，两者不是耦合的，然后把切面功能和核心业务功能 "编织" 在一起。**
 
 所以有了Spring AOP，开发者专注于核心业务逻辑开发，**将事务管理、安全控制等周边业务逻辑模块化而开发者需要时复用即可**，提高代码的可维护性和可重用性。
 
 Spring AOP 是基于代理模式实现，有两种动态代理方式JDK动态代理和CGLIB动态代理。
 
 - 默认使用JDK动态代理，一般就是对接口进行代理。
+
 - 当目标类没有实现接口时，Spring会使用进行代理
 
-AOP主要用于自动实现日志记录、性能统计、安全控制、事务处理、异常处理等横切，由开发者通过XML文件或者注解来复用即可。
+AOP主要用于自动实现日志记录、性能统计、安全控制、事务处理、异常处理等横切，由开发者通过注解来复用即可。
+
+
+
+在 AOP 中有以下几个概念：
+
+- **Aspect**：切面，只是一个概念，没有具体的接口或类与之对应，是 Join point，Advice 和 Pointcut 的一个统称。
+- **Join point**：连接点，指程序执行过程中的一个点，例如方法调用、异常处理等。在 Spring AOP 中，仅支持方法级别的连接点。
+- **Advice**：通知，即我们定义的一个切面中的横切逻辑，有“around”，“before”和“after”三种类型。在很多的 AOP 实现框架中，Advice 通常作为一个拦截器，也可以包含许多个拦截器作为一条链路围绕着 Join point 进行处理。
+- **Pointcut**：切点，用于匹配连接点，一个 AspectJ 中包含哪些 Join point 需要由 Pointcut 进行筛选。
+- **AOP proxy**：AOP 代理，指在 AOP 实现框架中实现切面协议的对象。在 Spring AOP 中有两种代理，分别是 JDK 动态代理和 CGLIB 动态代理。
+- **Target object**：目标对象，就是被代理的对象。
+
+
+##### Q：如果我在一个方法上同时加了 `@Before`, `@After`, `@Around`, `@AfterReturning`。 **请问它们的执行顺序是怎样的？**
+A：
+1. **Around (前)**：环绕通知的 `proceed()` 之前的部分。
+2.  **Before**：前置通知。
+3.  **Target Method**：执行目标方法业务逻辑。
+4.  **AfterReturning**：后置返回通知（拿到返回值）。
+5. **After**：最终通知（不管有没有异常都会走，类似 finally）。
+6. **Around (后)**：环绕通知的 `proceed()` 之后的部分。
+
+
+
+
+
+
+
+
+
+
+
+
+#### SpringAOP主要想解决什么问题？
+
+**AOP 的核心目标是解决横切关注点（Cross-Cutting Concerns）与核心业务功能耦合的问题**。横切关注点是指那些分散在多个模块中、与核心业务逻辑无关但必须存在的功能（如日志、事务、权限校验）。这些功能如果直接嵌入在业务代码中，会导致代码重复、耦合度高、难以维护。**AOP 通过将这些横切关注点模块化，并将其与核心业务逻辑分离，从而实现代码的复用和解耦。**
+
+- **核心业务**：登陆、注册、增、删、改、查、都叫核心业务
+- **周边功能**：日志、事务管理这些次要的为周边业务
+
+所以有了Spring AOP，开发者专注于核心业务逻辑开发，**将事务管理、安全控制等周边业务逻辑模块化而开发者需要时复用即可**，提高代码的可维护性和可重用性。
 
 
 
@@ -554,112 +539,72 @@ Spring AOP：运行时动态生成代理类，一个切面可以处理所有带�
 
 Spring Boot通过Spring框架的事务管理模块来支持事务操作。事务管理在Spring Boot中通常是通过 @Transactional 注解来实现的。事务可能会失效的一些常见情况包括:
 
-1. **异常未被正确抛出**
+##### 1. **自身调用问题（Self-invocation）**
 
-   - **问题**：默认情况下，只有抛出 `RuntimeException` 或 `Error` 时事务才会回滚。如果事务方法中抛出了受检异常（如 `Exception` 的子类）且未通过 `@Transactional(rollbackFor = Exception.class)` 显式配置，事务不会回滚。
-   - **修正**：若异常被 `try-catch` 捕获且未重新抛出，事务会正常提交（不会回滚），但这属于业务逻辑错误，而非事务失效。
+- **问题**：在 Spring 中，事务管理是通过代理机制实现的。当在同一个类中通过 `this.method()` 调用带有 `@Transactional` 注解的方法时，由于是直接调用而非通过代理对象调用，Spring 的代理机制无法拦截该方法，导致事务失效。
 
-2. **非 public 方法使用 @Transactional**
+- **示例**：
 
-   - **问题**：Spring 基于代理（JDK 动态代理或 CGLIB）实现事务。若将 `@Transactional` 标注在非 `public` 方法上，代理无法拦截方法调用，导致事务未生效。
-   - **补充**：CGLIB 代理可支持 `protected` 方法，但需显式配置（如 `@EnableAspectJAutoProxy(proxyTargetClass = true)`），但通常不推荐这样做。
+  ```java
+  @Service
+  public class UserService {
+      public void A() {
+          this.B(); // 直接调用，绕过代理，事务失效
+      }
+      
+      @Transactional
+      public void B() {
+          // 数据库操作
+      }
+  }
+  ```
 
-3. **自调用问题（同一类内部方法调用）**
+- **解决方案**：拆分到不同类中通过注入调用，或注入自身代理对象，或使用 `AopContext.currentProxy()` 获取代理对象调用。
 
-   - **问题**：在 Spring 中，事务管理是通过代理机制实现的。当你在一个类中调用另一个带有 `@Transactional` 注解的方法时，如果直接通过 `this` 调用（即内部调用），Spring 的代理机制无法拦截该方法，导致事务失效。
+##### 2. **异常被捕获未抛出**
 
-   - **示例**：Spring 的事务管理基于代理（JDK 动态代理或 CGLIB 代理）。当调用 `A()` 时，`A()` 是直接通过 `this` 调用 `B()`，而不是通过代理对象调用。因此，`B()` 的 `@Transactional` 注解不会被代理拦截，事务不会生效。
+- **问题**：当事务方法中抛出的异常被 `try-catch` 捕获且未重新抛出时，Spring 无法感知到异常，事务会正常提交而不会回滚。
+- **解决方案**：捕获异常后必须重新抛出，或者不捕获让异常自然传播。
 
-     ```java
-     @Service
-     public class UserService {
-         public void A() {
-             this.B(); // 直接调用，事务失效
-         }
-         @Transactional
-         public void B() {
-             // 数据库操作
-         }
-     }
-     ```
+##### 3. **异常类型不匹配**
 
-   - **解决方案**：通过注入自身代理对象或拆分到不同类中调用。
+- **问题**：Spring 事务默认只对 `RuntimeException` 和 `Error` 进行回滚。如果事务方法抛出了受检异常（Checked Exception，如 `IOException`、`SQLException` 等）且未通过 `@Transactional(rollbackFor = Exception.class)` 显式配置，事务不会回滚。
+- **解决方案**：显式指定回滚的异常类型：`@Transactional(rollbackFor = Exception.class)`。
 
-     ```java
-     @Service
-     public class UserService {
-         @Autowired
-         private AnotherService anotherService;
-     
-         public void A() {
-             anotherService.B(); // 通过另一个类的代理对象调用，事务生效
-         }
-     }
-     
-     @Service
-     public class AnotherService {
-         @Transactional
-         public void B() {
-             // 数据库操作
-         }
-     }
-     ```
+##### 4. **方法访问权限问题**
 
-4. **事务传播行为配置不当**
+- **问题**：Spring 的 `@Transactional` 注解源码中写死了：**默认只对 `public` 方法生效**。若将 `@Transactional` 标注在 `private`、`protected` 或默认访问权限的方法上，代理无法拦截方法调用，导致事务未生效。
+- **解决方案**：确保事务方法的访问权限为 `public`。
 
-   - **问题**：Spring 提供了多种事务传播行为（如 `REQUIRED`、`REQUIRES_NEW` 等），用于控制事务的边界和嵌套行为。如果传播行为配置不当，可能导致事务未按预期执行。若嵌套事务的传播行为未正确配置，可能导致事务未按预期隔离或提交。
+##### 5. **方法被 final 修饰（CGLIB 代理失效）**
 
-   - **示例**：父事务 `A` 调用子事务 `B`。子事务 `B` 配置为 `REQUIRES_NEW`，表示无论父事务是否存在，`B` 都会启动一个新事务。如果 `B` 执行时抛出异常，但异常未被传播到父事务 `A`，则 `B` 会回滚，而 `A` 不会回滚。
+- **问题**：当使用 CGLIB 代理时（如类未实现接口），Spring 通过创建子类来实现代理。如果方法被 `final` 修饰，子类无法重写该方法，导致代理失效，事务不生效。同样，`final` 类也无法被 CGLIB 代理。
+- **解决方案**：避免在事务方法上使用 `final` 修饰符，或使用接口 + JDK 动态代理。
 
-     ```java
-     @Service
-     public class UserService {
-         @Autowired
-         private AnotherService anotherService;
-     
-         @Transactional
-         public void A() {
-             try {
-                 anotherService.B(); // 子事务 B，配置为 REQUIRES_NEW
-             } catch (Exception e) {
-                 // 捕获异常，未传播到父事务
-             }
-             // 父事务 A 继续执行
-         }
-     }
-     
-     @Service
-     public class AnotherService {
-         @Transactional(propagation = Propagation.REQUIRES_NEW)
-         public void B() {
-             // 数据库操作
-             throw new RuntimeException("B 抛出异常");
-         }
-     }
-     ```
+##### 6. **数据库引擎不支持事务**
 
-5. **多数据源未正确配置事务管理器**
+- **问题**：某些数据库引擎不支持事务操作。例如 MySQL 的 MyISAM 存储引擎不支持事务，即使代码配置正确，事务也不会生效。只有 InnoDB 等支持事务的引擎才能正常使用 Spring 事务管理。
+- **解决方案**：确保数据库表使用支持事务的存储引擎，如 MySQL 的 InnoDB。
 
-   - **问题**：多数据源场景下，若未通过 `@Transactional(value = "txManager2")` 指定对应的事务管理器，事务可能绑定到默认数据源，导致操作失效。
-   - **补充**：需为每个数据源配置独立的 `PlatformTransactionManager`。
+##### 7. **Bean 未被 Spring 管理**
 
-6. **数据库引擎不支持事务**
+- **问题**：如果类没有被 Spring 容器管理（例如通过 `new` 关键字手动创建对象），Spring 无法为其创建代理对象，`@Transactional` 注解不会生效。
 
-   - **问题**：如 MySQL 的 MyISAM 引擎不支持事务，即使代码正确，事务也不会生效。
+  ```java
+  // 错误示例
+  UserService userService = new UserService(); // 手动 new，不受 Spring 管理
+  userService.updateUser(); // 事务失效
+  ```
 
-7. **未启用事务管理**
-
-   - **问题**：Spring Boot 需依赖 `@EnableTransactionManagement`（默认自动配置）启用事务。若配置被覆盖或禁用，事务失效。
-
-8. **@Transactional 注解作用在接口或抽象方法上**
-
-   - **问题**：JDK 动态代理通过接口生成代理类，但 CGLIB 代理通过子类化实现。若使用 CGLIB 且 `@Transactional` 标注在接口方法上，可能导致事务未生效（取决于代理方式）。
+- **解决方案**：确保类通过 `@Service`、`@Component` 等注解被 Spring 管理，并通过 `@Autowired` 注入使用。
 
 
 
-**Q：讲一讲事务传播行为`REQUIRED`、`REQUIRES_NEW` 等？（扩展了解）**
 
-A：事务传播行为是 Spring 事务管理中的一个核心概念，用于定义事务方法之间的交互方式。事务传播行为定义了当一个事务方法被另一个事务方法调用时，事务应该如何传播。Spring 提供了 7 种传播行为，常见的有三种：
+
+#### 讲一讲事务传播行为`REQUIRED`、`REQUIRES_NEW` 等？
+
+事务传播行为是 Spring 事务管理中的一个核心概念，用于定义事务方法之间的交互方式。事务传播行为定义了当一个事务方法被另一个事务方法调用时，事务应该如何传播。Spring 提供了 7 种传播行为，常见的有三种：
 
 - **REQUIRED（默认）**，即如果当前存在事务，则加入该事务；如果当前没有事务，则创建一个新事务。大多数业务方法都使用 `REQUIRED`，因为它能保证方法在事务中执行。
 - **REQUIRES_NEW**，无论当前是否存在事务，都创建一个新事务。如果当前存在事务，则将当前事务挂起，直到新事务完成。适用于需要独立事务的方法，例如日志记录或异步任务。
@@ -773,11 +718,34 @@ public class AnotherService {
 
 
 
+##### Q：REQUIRES_NEW和NESTED这俩看起来都能实现子事务回滚不影响父事务，那它们到底有啥本质区别？
+A：
+1. 物理连接的区别 (Core Difference)
+* **REQUIRES_NEW**：是 **“真·新事务”**。
+    * 它会开启一个**全新的数据库连接（Connection）**。
+    * 父事务和子事务是完全隔离的两个物理连接。
+    * *后果*：如果子事务提交了，父事务挂了，子事务**不会**回滚（因为它已经提交进磁盘了）。
+* **NESTED**：是 **“伪·新事务”**。
+    * 它使用的是 **同一个数据库连接**。
+    * 它底层的原理是 JDBC 的 **Savepoint (保存点)** 技术。
+    * *后果*：它只是在父事务里打了个“标记”。如果父事务挂了，**NESTED 是会跟着一起回滚的！**（这是最大的区别：父亲死，儿子陪葬；但 REQUIRES_NEW 是父亲死，儿子不管）。
+
+ 2. 锁的持有
+* **REQUIRES_NEW**：因为是两个连接，所以如果父子事务操作同一行数据，可能会**死锁**。
+* **NESTED**：同一个连接，不存在这个问题。
+
+
+
+
+
 #### Spring的事务，使用this调用是否生效？
 
 不能生效。
 
 因为Spring事务是通过代理对象来控制的，只有通过代理对象的方法调用才会应用事务管理的相关规则。当使用`this`直接调用时，是绕过了Spring的代理机制，因此不会应用事务设置。
+
+
+
 
 
 
@@ -814,6 +782,16 @@ Spring AOP允许开发者定义切面（Aspect），这些切面可以横切关�
 
 
 
+##### Q：反射这么好，但是大家都说他性能差，知道是为什么吗？
+A：主要还是Java虚拟机层面，JVM 无法对反射代码进行深度的 JIT 优化（如内联），且要做很多安全检查。
+
+
+
+
+
+
+
+
 #### spring三级缓存的数据结构是什么？
 
 都是 Map类型的缓存，比如Map {k:name; v:bean}。
@@ -834,9 +812,13 @@ Spring AOP允许开发者定义切面（Aspect），这些切面可以横切关�
 
 A：**一级缓存**（singletonObjects）用来存储完全初始化好的单例Bean（成品对象）。但**三级缓存（singletonFactories）** 可以存储`ObjectFactory`工厂，用于生成Bean的**早期引用（可能是代理对象）**。如若A被AOP代理，则通过`ObjectFactory`提前暴露代理对象，而非原始对象。
 
-而**二级缓存（earlySingletonObjects）**作用在于当一个 Bean 正在创建过程中，其他依赖于它的 Bean 可能会请求该 Bean。此时，Spring 可以从二级缓存中获取该 Bean 的早期引用，从而避免再次执行三级缓存中的 `ObjectFactory.getObject()`，提高性能。
+而**二级缓存（earlySingletonObjects）** 作用在于当一个 Bean 正在创建过程中，其他依赖于它的 Bean 可能会请求该 Bean。此时，Spring 可以从二级缓存中获取该 Bean 的早期引用，从而避免再次执行三级缓存中的 `ObjectFactory.getObject()`，提高性能。
 
 如果没有AOP代理，三级缓存可退化为二级缓存，因为在没有代理的情况下，Bean 的早期引用和最终的 Bean 实例是相同的，Spring 不需要通过 `ObjectFactory` 来延迟创建。但为了兼容AOP等扩展机制，Spring保留三级缓存设计。
+
+但是务必要考虑AOP，而且Spring 的原则是：**AOP 代理要在“初始化（Initialization）”阶段生成**（也就是完全可用前的最后一个阶段）。但是，如果 A 依赖 B，B 又依赖 A。当 B 去找 A 的时候，A 还在“属性赋值”阶段，还没到“初始化”。B 需要注入 A 的代理对象（因为 A 被切面拦截了），但 A 还没来得及生成代理对象。所以就有了一个三级缓存放他的 **ObjectFactory**。这个 Factory 的逻辑是：“如果有人急着要用这个对象，那就提前把 AOP 代理造出来；如果不急，我就啥也不干”。
+
+
 
 **一句话就是，三级缓存的设计使得 Spring 在解决 单例模式 下的循环依赖时非常高效，同时也支持了 AOP 代理等高级功能。**
 
@@ -848,7 +830,10 @@ A：**一级缓存**（singletonObjects）用来存储完全初始化好的单�
 
 
 
-#### **spring是如何解决循环依赖的？**（似乎很重要）
+
+
+
+#### spring是如何解决循环依赖的？（似乎很重要）
 
 循环依赖指的是两个类中的属性相互依赖对方：例如 A 类中有 B 属性，B 类中有 A属性，从而形成了一个依赖闭环，如下图。
 
@@ -872,9 +857,9 @@ Spring 解决单例模式下的setter循环依赖问题的主要方式是通过�
 
    - 将A的创建工厂放入三级缓存（singletonFactories）：
 
-     ```java
-     singletonFactories.put("beanA", () -> getEarlyBeanReference("beanA", mbd, instanceA));
-     ```
+```java
+ singletonFactories.put("beanA", () -> getEarlyBeanReference("beanA", mbd, instanceA));
+```
 
    - 这个工厂方法`getEarlyBeanReference`会检查Bean是否需要被AOP代理
 
@@ -1056,13 +1041,34 @@ public class MyController {
 
 Bean 的生命周期是 Spring 框架中一个重要的概念，它描述了 Bean 从创建到销毁的完整过程。以下是 Bean 生命周期的详细stages：
 
-1. **Bean 定义阶段**：最初始的阶段，Spring容器通过读取XML配置文件、注解或Java配置类来获取Bean的定义信息。
-2. **Bean 实例化阶段**：Spring 使用反射机制创建 Bean 实例，调用无参构造方法创建对象
-3. **依赖注入阶段**：通过 `@Autowired`、`setter` 方法或构造函数注入依赖，解析并注入相关的依赖对象
-4. **Bean 初始化阶段**：执行 `@PostConstruct` 注解标注的方法或调用 `InitializingBean` 接口的 `afterPropertiesSet()` 方法或执行自定义的 `init-method`，这三种初始化方法可以共存，如果共存，按照先后顺序来进行执行。
-5. **Bean 可用阶段**：Bean 完全初始化，可以被应用程序使用，处理业务逻辑。
-6. **Bean 销毁阶段**：容器关闭时触发，执行 `@PreDestroy` 注解标注的方法或调用 `DisposableBean` 接口的 `destroy()` 方法或执行自定义的 `destroy-method`，这三种销毁方法可以共存，如果共存，按照先后顺序来进行执行。
+##### 第 1 步：实例化 (Instantiation)
+* **术语连接**：Spring 根据 **`BeanDefinition`**（类的定义），利用反射（Constructor）在堆内存中 new 出一个原始对象。
+* *注意*：这时候对象是空的，属性都是 null。
 
+##### 第 2 步：属性赋值 (Populate Bean)
+* **术语连接**：Spring 通过 **`populateBean`** 方法，把依赖的 Bean 注入进去（这里会触发**三级缓存**逻辑来解决循环依赖）。
+
+##### 第 3 步：Aware 接口回调 (Aware Interfaces) 
+* **逻辑**：对象建好了，属性填了，现在 Bean 想要知道“我是谁？我在哪？”
+* **术语连接**：
+    * **`BeanNameAware`**：传给我 Bean 的名字。
+    * **`BeanFactoryAware`** / **`ApplicationContextAware`**：传给我容器的引用（让我能手动获取其他 Bean）。
+
+##### 第 4 步：初始化 (Initialization)
+
+1.  **`BeanPostProcessor.before`**：**初始化前置处理**（扩展点）。
+2.  **执行初始化方法**：
+    * ① **注解**：**`@PostConstruct`** (Java 标准注解，优先级最高)。
+    * ② **接口**：实现 **`InitializingBean`** 接口的 `afterPropertiesSet()` 方法。
+    * ③ **XML**：配置的 **`init-method`**。
+3.  **`BeanPostProcessor.after`**：**初始化后置处理**（扩展点）。
+    * 🔥 **关键点**：**AOP 代理对象** 通常就是在这里（后置处理）通过“偷梁换柱”生成的！
+
+##### 第 5 步：销毁 (Destruction)
+同样是“三板斧”顺序：
+1.  **注解**：**`@PreDestroy`**。
+2.  **接口**：实现 **`DisposableBean`** 接口。
+3.  **XML**：配置的 **`destroy-method`**。
 
 
 这里举一个具体的示例：
@@ -1903,11 +1909,11 @@ public class DemoController {
 - 默认使用HikariCP作为连接池。  
 - 自动配置JPA（如Hibernate作为实现）。  
 - 只需在`application.properties`中配置数据库连接信息：
-  ```properties
+```properties
   spring.datasource.url=jdbc:mysql://localhost:3306/mydb
   spring.datasource.username=root
   spring.datasource.password=123456
-  ```
+```
 
 
 
@@ -2075,6 +2081,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 但如果用户手动定义了Bean（如自定义 `DataSource`），Spring Boot会优先使用用户配置（`@ConditionalOnMissingBean` 失效）。
 
 也可以通过 `application.properties` 或 `application.yml` 可以覆盖默认配置（如修改端口 `server.port=9090`）。
+
 
 
 
@@ -2377,8 +2384,6 @@ Spring Boot 通过 `@SpringBootApplication` 注解启动，其中 `@EnableAutoCo
 
 具体来说， Web starter中`TomcatServletWebServerFactory` 是 Spring Boot 提供的 `ServletWebServerFactory` 实现类，主要负责创建和配置 Tomcat 实例。它会初始化 Tomcat 服务器、设置监听端口、配置上下文路径，并注册 `Servlet`、`Filter` 和 `Listener`，使应用能够接受 HTTP 请求。
 
-
-
 `ApplicationContext`会使用 Tomcat工厂创建并启动tomcat实例。然后用户请求时tomcat会分配线程去处理这个链接，然后将请求转发给前端控制器，后面的话那就是用户编写的MVC逻辑的事情了。
 
 
@@ -2401,16 +2406,16 @@ MyBatis 的优点包括：
 - 能够与 Spring 很好的集成，开发效率高
 - 提供映射标签，支持对象与数据库的**半自动化 ORM**关系映射（ORM即将对象模型与关系型数据库中的数据进行映射）；提供对象关系映射标签，支持对象关系组件维护。
 
-| **特性**         | **MyBatis**                                              | **JDBC**                                  |
-| ---------------- | -------------------------------------------------------- | ----------------------------------------- |
-| **SQL 编写方式** | 使用 XML 配置文件或注解进行 SQL 编写                     | 在代码中手动编写 SQL 语句                 |
-| **代码量**       | 减少 50% 以上                                            | 需要编写大量 JDBC 连接管理代码            |
-| **数据库兼容性** | 支持所有 JDBC 支持的数据库                               | 需要针对每个数据库编写特定的连接代码      |
-| **事务管理**     | 依赖 Spring 等框架可自动实现事务管理                     | 需要手动管理事务                          |
-| **动态 SQL**     | 支持动态 SQL 生成（<if>, <choose> 等标签）               | 需要手动拼接 SQL，易出错且不够灵活        |
-| **ORM 支持**     | **半自动化 ORM**，支持对象与数据库字段的映射（自动映射） | 没有 ORM 映射功能，需要手动处理映射关系   |
-| **与框架集成**   | 与 Spring 集成顺畅，支持事务管理和 AOP                   | 集成较为麻烦，需要手动管理事务和连接池    |
-| **学习曲线**     | 相对较低，配置简单易懂                                   | 学习成本较高，涉及 SQL 和 JDBC 的细节管理 |
+| **特性**       | **MyBatis**                      | **JDBC**                   |
+| ------------ | -------------------------------- | -------------------------- |
+| **SQL 编写方式** | 使用 XML 配置文件或注解进行 SQL 编写          | 在代码中手动编写 SQL 语句            |
+| **代码量**      | 减少 50% 以上                        | 需要编写大量 JDBC 连接管理代码         |
+| **数据库兼容性**   | 支持所有 JDBC 支持的数据库                 | 需要针对每个数据库编写特定的连接代码         |
+| **事务管理**     | 依赖 Spring 等框架可自动实现事务管理           | 需要手动管理事务                   |
+| **动态 SQL**   | 支持动态 SQL 生成（<if>, <choose> 等标签）  | 需要手动拼接 SQL，易出错且不够灵活        |
+| **ORM 支持**   | **半自动化 ORM**，支持对象与数据库字段的映射（自动映射） | 没有 ORM 映射功能，需要手动处理映射关系     |
+| **与框架集成**    | 与 Spring 集成顺畅，支持事务管理和 AOP        | 集成较为麻烦，需要手动管理事务和连接池        |
+| **学习曲线**     | 相对较低，配置简单易懂                      | 学习成本较高，涉及 SQL 和 JDBC 的细节管理 |
 
 
 
@@ -2431,7 +2436,7 @@ MyBatis 稍微有点不同因为可以将查询结果自动映射到 Java 对象
 
 
 
-假设有两个表：**用户表（User）**来存储用户信息。**订单表（Order）**：存储用户的订单信息，一个用户可以有多个订单。
+假设有两个表：**用户表（User）** 来存储用户信息。**订单表（Order）**：存储用户的订单信息，一个用户可以有多个订单。
 
 **表结构**如下
 
